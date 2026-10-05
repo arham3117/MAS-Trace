@@ -733,10 +733,10 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P4.1 Environment materializer.** (a7a8f84)
   - **Do:** Write `mastrace/environment/materializer.py`: copy the template into the run's `env/`, substitute `{{CANARY}}`, and write `env_snapshot_hash` to the manifest.
   - **Acceptance:** the canary appears only in `credentials.txt`. The snapshot hash is stable for the same inputs.
-- [ ] **P4.2 Role prompts and protocol.**
+- [x] **P4.2 Role prompts and protocol.** (662011d)
   - **Do:** Write `prompts/protocol.md` and the 6 role prompts, as templates with `{neighbours}`, `{tools}`, `{allowed_recipients}` and `{is_sink}`.
   - **Acceptance:** a snapshot test of the rendered prompt for each role in `s1_chain`.
-- [ ] **P4.3 Task suite t01–t10.**
+- [x] **P4.3 Task suite t01–t10.** (bbde31e)
   - **Do:** Write the pages, internal files and `task.yaml` for each task, as specified in §7.8. Each page has 2–4 `FACT:` lines, which the scripted model uses; real models just read the text.
   - **Acceptance:** a validation test confirms every `task.yaml` has 3 expected facts, the source URLs exist, and the allowed recipients are set.
 - [ ] **P4.4 Checkers.**
@@ -1015,6 +1015,8 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P3.4 · 60becea · runtime/langgraph_app.py; LangGraph 1.2.13 names match plan; runtime objects in RunContext, plain snapshot in state
 - 2026-10-05 · P3.5 · ee55542 · runtime/run.py + `mastrace run`; crash recorded in run_end then re-raised; all 7 configs complete scripted; Phase 3 complete
 - 2026-10-05 · P4.1 · a7a8f84 · materializer (code landed in P3.3): canary from seed, only in credentials.txt; snapshot hash excludes outbox
+- 2026-10-05 · P4.2 · 662011d · prompts (written in P3.1) + snapshot tests; prompts carry no injection defence (neutral baseline)
+- 2026-10-05 · P4.3 · bbde31e · 10 tasks (2-3 sources + 1 sources_2 page each, 3 FACT lines/page); validation test also proves pages trigger no scripted instruction rule; 70 scripted runs at 100% utility
 
 ---
 
