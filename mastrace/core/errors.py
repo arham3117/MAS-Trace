@@ -18,3 +18,11 @@ class UnknownModelKey(ConfigError):
         super().__init__(
             f"unknown model key {key!r}; known keys in models.yaml: {', '.join(known) or '(none)'}"
         )
+
+
+class PayloadMissing(MastraceError):
+    """A payload reference points to a file that does not exist."""
+
+
+class InvalidPayloadRef(MastraceError):
+    """A string is not of the form `sha256:<64 hex chars>`."""

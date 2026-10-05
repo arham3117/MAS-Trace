@@ -616,7 +616,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - `Verdict`, `Override`
     - `GraphConfig` (with the §7.1 validators), `AttackSpec`, `TaskSpec`, `ModelRequest`, `ModelResponse`, `ToolRequest`, `ToolResult`
   - **Acceptance:** each `GraphConfig` validation rule has a passing case and a failing case. The schemas round-trip through JSON.
-- [ ] **P1.2 Canonical JSON and hashing.**
+- [x] **P1.2 Canonical JSON and hashing.** (f899cf5)
   - **Do:** Write `mastrace/core/canonical.py`: `canonical_json`, `sha256_hex`, `request_hash_model` and `request_hash_tool`, as specified in §7.7.
   - **Acceptance:** the hashes are stable across dict insertion orders, and unicode text is preserved.
 - [ ] **P1.3 PayloadStore.**
@@ -999,6 +999,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P0.4 · 36710a9 · autouse no_network guard (tests/netguard.py), tmp_data_dir, fixed_seed (ISSUE-003)
 - 2026-10-05 · P0.5 · 73baed6 · core/logging.py (logs/mastrace.log + console), code_version() with -dirty; Phase 0 complete
 - 2026-10-05 · P1.1 · bc32117 · core/schemas.py; GraphConfig rules 1-6 as validators, 7-8 as check_resources/check_scripted_feedback
+- 2026-10-05 · P1.2 · f899cf5 · core/canonical.py: canonical_json, sha256_hex, request_hash_model/tool
 
 ---
 
