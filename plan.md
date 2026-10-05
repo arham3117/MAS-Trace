@@ -647,7 +647,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 2: Mediation, part 1 (gateways and memory)
 
-- [ ] **P2.1 Model providers.**
+- [x] **P2.1 Model providers.** (c43dc65)
   - **Do:** In `mastrace/mediation/providers/`, define the interface `ModelProvider.complete(ModelRequest) -> ModelResponse`, where the response carries the text plus prompt and completion token counts.
   - **Do:** Implement `ScriptedProvider(policy: Literal["gullible", "resistant"])` following §7.13. It takes options `policy_overrides: dict[agent_id, policy]` (used in P11.1) and `feedback_rounds: int` (default 1).
   - **Do:** Implement `LiteLLMProvider(model_key)`, which calls `litellm.completion` at temperature 0, passes the seed if supported, and retries up to 3 times on transient errors (each retry is logged).
@@ -1005,6 +1005,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P1.5 · e4ba433 · provenance/event_store.py: WAL, indexes, triggers block UPDATE/DELETE on events
 - 2026-10-05 · P1.6 · 2fae584 · provenance/recorder.py + core/ids.py; local refs resolved at commit; 1000 events in 0.4s (ISSUE-004)
 - 2026-10-05 · P1.7 · 773d004 · provenance/verifier.py + `mastrace verify-log`; detects edits, deletes, reorders, payload changes, bad sigs, truncation (via summary); Phase 1 complete
+- 2026-10-05 · P2.1 · c43dc65 · core/protocol.py contract; ScriptedProvider (§7.13) + LiteLLMProvider with 3 retries; policies doc (ISSUE-005)
 
 ---
 

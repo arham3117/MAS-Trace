@@ -38,3 +38,11 @@ class EventNotFound(MastraceError, KeyError):
 
 class UnknownLocalRef(MastraceError):
     """A `built_from` entry refers to a buffered event that was never committed."""
+
+
+class CacheMiss(MastraceError):
+    """`strict_replay` mode found no cached response for a request."""
+
+
+class BudgetExceeded(MastraceError):
+    """The run's token budget (`max_tokens_run`) was exceeded."""

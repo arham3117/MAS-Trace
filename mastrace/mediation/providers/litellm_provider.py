@@ -41,6 +41,7 @@ class LiteLLMProvider:
         if cfg.provider != "litellm" or not cfg.model:
             raise ConfigError(f"model key {cfg.key!r} is not a configured litellm model")
         self.cfg = cfg
+        self.identity = cfg.model
         self.max_retries = max_retries
         self._sleep = sleep
         self._completion = completion or litellm.completion

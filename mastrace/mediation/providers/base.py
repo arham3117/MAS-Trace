@@ -11,6 +11,7 @@ class ModelProvider(Protocol):
     """Anything that can answer a `ModelRequest`. Only the model gateway calls providers."""
 
     name: str
+    identity: str  # names the model *and* its behaviour; part of every request hash
 
     def complete(self, request: ModelRequest) -> ModelResponse:
         """Return the model's answer to `request`."""

@@ -202,6 +202,10 @@ class ScriptedProvider:
         self.policy = policy
         self.policy_overrides = dict(policy_overrides or {})
         self.feedback_rounds = feedback_rounds
+        overrides = ",".join(f"{a}={pol}" for a, pol in sorted(self.policy_overrides.items()))
+        self.identity = f"scripted/{policy}/fr{feedback_rounds}" + (
+            f"/{overrides}" if overrides else ""
+        )
 
     def complete(self, request: ModelRequest) -> ModelResponse:
         """Decide the next action from the conversation in `request`."""
