@@ -574,7 +574,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 0: Project setup
 
-- [ ] **P0.1 Repository skeleton.**
+- [x] **P0.1 Repository skeleton.** (04eb3c3)
   - **Do:** Create the layout in §6 with empty modules and `__init__.py` files. Set up `pyproject.toml` with the §5 dependencies, `uv` lock, and `ruff` and `mypy` config.
   - **Do:** Write a `Makefile` with these targets:
     - `install`
@@ -993,7 +993,7 @@ mastrace report
 Append one line per completed task or significant event, newest last:
 `- YYYY-MM-DD · P<phase>.<task> · <commit> · <one-line note>`
 
-- (empty)
+- 2026-10-05 · P0.1 · 04eb3c3 · skeleton, pyproject (Python 3.12 pinned), Makefile; `make check` green; see ISSUE-001
 
 ---
 
