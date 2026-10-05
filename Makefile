@@ -22,7 +22,7 @@ test-all:
 	$(UV) run pytest
 
 gate:
-	$(UV) run mastrace gate --stage $(STAGE)
+	$(UV) run mastrace gate --stage $(STAGE) $(GATE_ARGS)
 
 clean:
 	rm -rf .pytest_cache .mypy_cache .ruff_cache .coverage htmlcov dist build logs

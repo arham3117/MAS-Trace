@@ -801,7 +801,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P8.1 Scorer.** (316d1ea)
   - **Do:** Write `mastrace/evaluation/scorer.py`, following §7.12. It writes `reports/results/raw/scores.csv`, appending one row per (run, method).
   - **Acceptance:** unit tests with hand-made GT/verdict pairs cover each metric.
-- [ ] **P8.2 Gate test suites.**
+- [x] **P8.2 Gate test suites.** (5b6f33e)
   - **Do:** Write `tests/gates/test_gate_common.py` and `test_gate_stage{1,2,3}.py`, implementing every check in §9. Mark scripted checks `gate`+`plumbing` and real-model checks `gate`+`model`. Each check writes a JSON result line to `reports/gates/_current.jsonl`.
   - **Acceptance:** the stage 1 suite runs. Stage 2 and 3 suites may be skipped (`pytest.skip("stage not built")`) until their phase.
 - [ ] **P8.3 Controller CLI.**
@@ -1030,6 +1030,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P7.2 · 98c1be3 · analysis/tracer.py + configs/tracer.yaml; chain/fanin/fanout/G2 verdicts correct; stage-3 path tests by distinguishing edge
 - 2026-10-05 · P7.3 · 34e0d5f · `mastrace trace` (+ --allow-disabled on run); live symptom check re-runs the firing detector
 - 2026-10-05 · P8.1 · 316d1ea · evaluation/scorer.py -> reports/results/raw/scores.csv
+- 2026-10-05 · P8.2 · 5b6f33e · tests/gates harness + common/stage1-3; all scripted checks pass for stages 1-3
 
 ---
 
