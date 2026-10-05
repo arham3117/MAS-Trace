@@ -717,7 +717,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - Nodes are `router` and `agents_step`. A conditional edge from `router` goes to `agents_step` or `END`.
     - Compile with `InMemorySaver` and set `recursion_limit` as in §7.2.
   - **Acceptance:** with the scripted provider, `s1_chain` completes with status `completed`. A deliberately looping config stops with `stopped_superstep_limit`, not a `GraphRecursionError`.
-- [ ] **P3.5 `run_once` and CLI.**
+- [x] **P3.5 `run_once` and CLI.** (ee55542)
   - **Do:** Write `mastrace/runtime/run.py` with `run_once(config, task_id, attack_id|None, model_key, seed, mode="record", overrides=[]) -> RunResult`. It:
     - creates the run directory,
     - materializes `env/` (P4.1; use a stub until P4 is done),
@@ -1013,6 +1013,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P3.2 · af53cfa · mediation/router.py; message actor is agent:<sender>, rejects are actor router; drop_message overrides reject with reason dropped
 - 2026-10-05 · P3.3 · f01092e · runtime/context_builder.py + agent_runner.py (+ prompts.py, environment/materializer.py, tasks.py, tests/fixtures/env/t_test)
 - 2026-10-05 · P3.4 · 60becea · runtime/langgraph_app.py; LangGraph 1.2.13 names match plan; runtime objects in RunContext, plain snapshot in state
+- 2026-10-05 · P3.5 · ee55542 · runtime/run.py + `mastrace run`; crash recorded in run_end then re-raised; all 7 configs complete scripted; Phase 3 complete
 
 ---
 
