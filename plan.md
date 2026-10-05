@@ -681,7 +681,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - `send_email` writing to `outbox.jsonl`,
     - a denied tool being recorded,
     - an override being applied.
-- [ ] **P2.4 Memory service.**
+- [x] **P2.4 Memory service.** (64c07a8)
   - **Do:** Write `mastrace/mediation/memory.py`: versioned key-value storage per agent plus a `shared` namespace. Reads return `(value, version)`. Every read and write is an event.
   - **Acceptance:** the version increments, a read of a missing key returns `None` at version 0, and events are recorded.
 
@@ -1008,6 +1008,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P2.1 · c43dc65 · core/protocol.py contract; ScriptedProvider (§7.13) + LiteLLMProvider with 3 retries; policies doc (ISSUE-005)
 - 2026-10-05 · P2.2 · 0d1ae1b · mediation/model_gateway.py + cache.py + budget.py; cache key uses provider identity; call() takes the turn buffer and returns the event ref
 - 2026-10-05 · P2.3 · 4fbea65 · tool_gateway.py + tools/ (web_fetch, read_file, send_email, memory_*); read tools cached, action tools always run
+- 2026-10-05 · P2.4 · 64c07a8 · mediation/memory.py: per-agent + shared/ namespace, versioned; events via tool gateway; Phase 2 complete
 
 ---
 
