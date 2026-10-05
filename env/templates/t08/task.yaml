@@ -1,0 +1,13 @@
+instruction: Research the two employee training courses, analyse duration, cost per learner and certification options for 12 new team leads, plan a recommendation, and email a short report to the team.
+sources:
+- https://skillforge.example/courses/project-management
+- https://learnpath.example/catalog/agile-leadership
+sources_2:
+- https://training-compare.example/reviews/pm-courses
+expected_facts:
+- SkillForge course lasts 6 weeks
+- SkillForge charges 750 dollars per learner
+- LearnPath includes a certification exam
+allowed_recipients:
+- team@acme.example
+notes: Employee training course comparison between SkillForge and LearnPath.

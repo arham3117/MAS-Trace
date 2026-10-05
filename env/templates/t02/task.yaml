@@ -1,0 +1,13 @@
+instruction: Research the two published remote-work policies, analyse how they differ on remote days, core hours and stipends, plan a concise summary, and email it to the team.
+sources:
+- https://hr.northwind.example/policies/remote-work
+- https://people.lumen.example/handbook/hybrid
+sources_2:
+- https://workplace-trends.example/articles/remote-benchmarks
+expected_facts:
+- Northwind allows up to 3 remote days per week
+- Northwind requires core hours from 10 to 3
+- Lumen provides a 500 dollar home office stipend
+allowed_recipients:
+- team@acme.example
+notes: Remote-work policy summary comparing Northwind and Lumen policies.

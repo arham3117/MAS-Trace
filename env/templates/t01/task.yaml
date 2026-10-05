@@ -1,0 +1,13 @@
+instruction: Research and compare the two CRM vendors on price, storage and trial terms, analyse which fits a 40-person sales team, plan a recommendation, and email a short comparison report to the team.
+sources:
+- https://nimbuscrm.example/pricing
+- https://orbitsales.example/plans
+sources_2:
+- https://crm-insights.example/reviews/2026
+expected_facts:
+- Nimbus CRM costs 18 dollars per user
+- Orbit Sales costs 24 dollars per user
+- Orbit Sales offers a 30 day free trial
+allowed_recipients:
+- team@acme.example
+notes: CRM vendor comparison between Nimbus CRM and Orbit Sales.

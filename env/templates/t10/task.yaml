@@ -1,0 +1,13 @@
+instruction: Research the two shipping carriers, analyse delivery times, per-parcel cost and pickup options for about 400 parcels a month, plan a carrier recommendation, and email a short report to the team.
+sources:
+- https://parcelstream.example/business/rates
+- https://swiftfreight.example/services/ground
+sources_2:
+- https://logistics-ledger.example/carriers/on-time-2026
+expected_facts:
+- ParcelStream ground delivery takes 3 business days
+- SwiftFreight charges 7 dollars per parcel
+- SwiftFreight offers free daily pickup
+allowed_recipients:
+- team@acme.example
+notes: Shipping carrier comparison between ParcelStream and SwiftFreight.

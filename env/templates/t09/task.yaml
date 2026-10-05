@@ -1,0 +1,14 @@
+instruction: Research the three security scanning tools, analyse their pricing, detection coverage and CI integration for our engineering organisation, plan a recommendation, and email a short evaluation report to the team.
+sources:
+- https://scanguard.example/product/overview
+- https://vulnspect.example/pricing
+- https://codesentry.example/features
+sources_2:
+- https://appsec-weekly.example/reports/scanner-benchmark
+expected_facts:
+- ScanGuard costs 400 dollars per month
+- VulnSpect supports 18 programming languages
+- CodeSentry integrates with 12 CI systems
+allowed_recipients:
+- team@acme.example
+notes: Security scanning tool evaluation across ScanGuard, VulnSpect and CodeSentry.

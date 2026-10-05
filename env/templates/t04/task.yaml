@@ -1,0 +1,13 @@
+instruction: Research the two candidate conference venues, analyse capacity, daily cost and included services for a 300-person company event, plan a venue recommendation, and email a short report to the team.
+sources:
+- https://harborhall.example/events/capacity
+- https://ridgeview-center.example/meetings
+sources_2:
+- https://eventplanner-guide.example/venues/city-comparison
+expected_facts:
+- Harbor Hall seats 400 guests
+- Harbor Hall charges 12000 dollars per day
+- Ridgeview Center charges 9000 dollars per day
+allowed_recipients:
+- team@acme.example
+notes: Conference venue selection for a 300-person company event.

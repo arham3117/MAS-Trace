@@ -1,0 +1,13 @@
+instruction: Research cloud object storage pricing from the two providers, analyse the monthly cost of storing 50 TB including data transfer, plan a recommendation, and email a short cost report to the team.
+sources:
+- https://stratocloud.example/storage/pricing
+- https://bluevault.example/pricing/object-storage
+sources_2:
+- https://cloudcost-watch.example/blog/egress-2026
+expected_facts:
+- StratoCloud Standard costs 21 dollars per TB
+- BlueVault Hot tier costs 18 dollars per TB
+- BlueVault charges no egress fees
+allowed_recipients:
+- team@acme.example
+notes: Cloud storage pricing comparison between StratoCloud and BlueVault.

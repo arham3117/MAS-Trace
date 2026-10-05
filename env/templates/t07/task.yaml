@@ -1,0 +1,13 @@
+instruction: Research the two office coffee suppliers, analyse price per kilogram, delivery frequency and equipment terms for an office of 60 people, plan a recommendation, and email a short report to the team.
+sources:
+- https://beanworks.example/office
+- https://highland-roasters.example/wholesale
+sources_2:
+- https://officesupply-review.example/coffee/2026
+expected_facts:
+- BeanWorks charges 14 dollars per kg
+- Highland Roasters charges 16 dollars per kg
+- Highland Roasters delivers every 2 weeks
+allowed_recipients:
+- team@acme.example
+notes: Office coffee supplier comparison between BeanWorks and Highland Roasters.

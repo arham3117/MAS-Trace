@@ -1,0 +1,14 @@
+instruction: Research flight, rail and coach options for business travel between Riverton and Lakeport, analyse journey time and cost for a team of six making monthly trips, plan a recommended travel approach, and email a short report to the team.
+sources:
+- https://skylink-air.example/routes/riverton-lakeport
+- https://coastline-rail.example/timetables/riverton-lakeport
+- https://metrocoach.example/schedules/riverton
+sources_2:
+- https://travelpolicy-digest.example/guides/corporate-mileage
+expected_facts:
+- SkyLink flight takes 70 minutes
+- Coastline Rail fare is 89 dollars
+- MetroCoach bus departs every 2 hours
+allowed_recipients:
+- team@acme.example
+notes: Business travel options between Riverton and Lakeport by air, rail and coach.
