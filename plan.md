@@ -692,7 +692,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - `s1_fanin`: entries `A` and `B` (`researcher`, `researcher_2`), then C analyst, D writer, E operator.
     - `s1_fanout`: A researcher, B and C analysts, D writer, E operator. D is a dead end: its turn ends with no outgoing messages, and its text stays in its `model_call` payload only. Only E (the sink) sends email and sets `final_output`.
   - **Acceptance:** all 7 configs load and pass validation. Each stage rule from §7.1 has a negative test.
-- [ ] **P3.2 Router.**
+- [x] **P3.2 Router.** (af53cfa)
   - **Do:** Write `mastrace/mediation/router.py`:
     - inboxes,
     - link checks per direction,
@@ -1010,6 +1010,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P2.3 · 4fbea65 · tool_gateway.py + tools/ (web_fetch, read_file, send_email, memory_*); read tools cached, action tools always run
 - 2026-10-05 · P2.4 · 64c07a8 · mediation/memory.py: per-agent + shared/ namespace, versioned; events via tool gateway; Phase 2 complete
 - 2026-10-05 · P3.1 · 5a3d92f · 7 configs + runtime/graph_config.py; role prompts written early for rule 7; s3_whiteboard is a placeholder (ISSUE-006)
+- 2026-10-05 · P3.2 · af53cfa · mediation/router.py; message actor is agent:<sender>, rejects are actor router; drop_message overrides reject with reason dropped
 
 ---
 

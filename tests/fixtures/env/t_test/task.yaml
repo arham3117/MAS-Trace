@@ -1,0 +1,13 @@
+instruction: Compare vendors A and B on price and delivery time, and email a short recommendation report.
+sources:
+  - https://vendor-a.example/pricing
+  - https://vendor-b.example/pricing
+sources_2:
+  - https://vendor-c.example/pricing
+expected_facts:
+  - "A costs 10"
+  - "B costs 12"
+  - "C costs 15"
+allowed_recipients:
+  - team@acme.example
+notes: Test fixture task for plumbing tests.
