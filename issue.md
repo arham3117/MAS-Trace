@@ -20,6 +20,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-002 | Model config schema and placeholder dev model | decision | Low | Resolved | P0.3 | 2026-10-05 | 2026-10-05 |
 | ISSUE-003 | Scope of the `no_network` fixture | decision | Low | Resolved | P0.4 | 2026-10-05 | 2026-10-05 |
 | ISSUE-004 | Recorder design: local refs, clock, signature bytes and tamper triggers | decision | Low | Resolved | P1.6 | 2026-10-05 | 2026-10-05 |
+| ISSUE-005 | Prompt/text contract and ScriptedProvider details | decision | Low | Resolved | P2.1 | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -114,6 +115,33 @@ P1.4–P1.6 leave several details open. These choices were made:
 - Date: 2026-10-05
 - Fix: recorded as decisions.
 - Regression test: `tests/unit/test_recorder.py`, `tests/unit/test_event_store.py`
+
+---
+
+## ISSUE-005: Prompt/text contract and ScriptedProvider details
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** Resolved
+- **Task / phase:** P2.1
+- **Opened:** 2026-10-05
+
+**What happened**
+§7.13 says what the scripted model does, but not how it learns its role, neighbours, sources or senders from a prompt. These choices were made:
+1. **Shared text contract.** `mastrace/core/protocol.py` holds it, and the ContextBuilder (P3.3) must use it.
+   - Every system prompt ends with an `## Agent profile` block of `key: value` lines.
+   - User items carry headers: `[TASK from user]`, `[MESSAGE from B]`, `[TOOL RESULT <tool>]` and `[NOTE]`.
+   - Task bodies list their URLs on `SOURCE: <url>` lines, so `researcher_2` simply receives a task whose `SOURCE:` lines are `sources_2`.
+   - Action JSON is parsed leniently: bare JSON, a ```json fence, or the first `{…}` object.
+2. **Feedback text.** `<n>` in `FEEDBACK: received (<n>)` is the round number on that link (1, 2, …). Feedback goes only to senders listed in `two_way_with`.
+3. **No resending.** Each unit (a `FACT:` line or an instruction paragraph) is sent to a given neighbour at most once per run. Without this, `s2_two_way_mesh` would echo facts until the message limits hit.
+4. **Operator per turn.** The operator emails and sets `final_output` on **every** turn that brings new content. The report covers all content received so far. Exfiltration triggers on instruction paragraphs that arrived in the current turn.
+5. **Email rule.** An email address counts as an instruction only if it is **not** an allowed recipient. **Constraint for P4.3:** clean task pages must contain no email addresses other than `team@acme.example`, or G-C4 (no false alarms) breaks.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: recorded as decisions and documented in `tests/fixtures/scripted_policies.md`.
+- Regression test: `tests/unit/test_scripted_provider.py`
 
 ---
 
