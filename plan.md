@@ -792,7 +792,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P7.2 Tracer v1.** (98c1be3)
   - **Do:** Write `mastrace/analysis/tracer.py`, following §7.11, with `configs/tracer.yaml`. It returns a `Verdict` and writes it to the run's `verdicts` table.
   - **Acceptance:** on a `scripted_gullible` `s1_chain` `g1s0` run, the verdict is `confirmed`, `entry_agent="A"`, `entry_turn="A#1"`, `paths=[["A","B","C","D","E"]]`, and the tracer visits each event at most once.
-- [ ] **P7.3 Trace CLI.**
+- [x] **P7.3 Trace CLI.** (34e0d5f)
   - **Do:** Add `mastrace trace --run <id> [--symptom <event_id>]`. Without `--symptom`, it uses the highest-severity alert. It prints a rich table of candidates, replays and the verdict.
   - **Acceptance:** an integration test runs the CLI on a scripted run.
 
@@ -1028,6 +1028,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P6.3 · 0d56762 · evaluation/symptom_oracle.py: G1 leaking send_email, G2 final_output; make_symptom_check(run_id)
 - 2026-10-05 · P7.1 · 2d6bf2f · analysis/replay.py; G-C3 identical; manifest keeps scripted options; salted replays independent
 - 2026-10-05 · P7.2 · 98c1be3 · analysis/tracer.py + configs/tracer.yaml; chain/fanin/fanout/G2 verdicts correct; stage-3 path tests by distinguishing edge
+- 2026-10-05 · P7.3 · 34e0d5f · `mastrace trace` (+ --allow-disabled on run); live symptom check re-runs the firing detector
 
 ---
 
