@@ -772,7 +772,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P6.1 EventGraph.** (43840f2)
   - **Do:** Write `mastrace/provenance/event_graph.py`: build from a run, `ancestors(event_id) -> dict[id, depth]`, `simple_paths(src_turn, dst_event)` over message events, `is_acyclic()`, and a visit counter for tests.
   - **Acceptance:** tests on synthetic logs, including a two-way conversation. The graph is always acyclic.
-- [ ] **P6.2 Detectors.**
+- [x] **P6.2 Detectors.** (7e7aab1)
   - **Do:** Write D1, D2 and D4 (§7.10), with `configs/detectors.yaml`. Wire them into the router node so they run after each commit and write alerts.
   - **Acceptance:**
     - Unit tests on synthetic events.
@@ -1024,6 +1024,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P5.3 · c7f79b9 · groundtruth/resolver.py (uses provenance/event_graph.py, P6.1); entry A#1, true path A..E on scripted g1s0
 - 2026-10-05 · P5.4 · 32136b0 · transitive import graph check + model-gateway caller check; both shown to catch planted violations
 - 2026-10-05 · P6.1 · 43840f2 · EventGraph (code landed in P5.3): BFS visited-on-enqueue, simple_paths over causal messages
+- 2026-10-05 · P6.2 · 7e7aab1 · analysis/detectors.py + configs/detectors.yaml; no alerts on 10 clean scripted runs; D1 fires on g1s0
 
 ---
 
