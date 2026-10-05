@@ -608,7 +608,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 1: Event model and provenance
 
-- [ ] **P1.1 Schemas.**
+- [x] **P1.1 Schemas.** (bc32117)
   - **Do:** Write these pydantic models in `mastrace/core/schemas.py`:
     - `EventKind`, `EventRecord`
     - `RunManifest`, `Alert`
@@ -998,6 +998,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P0.3 · aa63d2d · settings + models.yaml; dev_open model name is a placeholder (ISSUE-002)
 - 2026-10-05 · P0.4 · 36710a9 · autouse no_network guard (tests/netguard.py), tmp_data_dir, fixed_seed (ISSUE-003)
 - 2026-10-05 · P0.5 · 73baed6 · core/logging.py (logs/mastrace.log + console), code_version() with -dirty; Phase 0 complete
+- 2026-10-05 · P1.1 · bc32117 · core/schemas.py; GraphConfig rules 1-6 as validators, 7-8 as check_resources/check_scripted_feedback
 
 ---
 
