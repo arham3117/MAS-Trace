@@ -26,3 +26,11 @@ class PayloadMissing(MastraceError):
 
 class InvalidPayloadRef(MastraceError):
     """A string is not of the form `sha256:<64 hex chars>`."""
+
+
+class OutOfOrderAppend(MastraceError):
+    """An event was appended with a `seq` other than the next one."""
+
+
+class EventNotFound(MastraceError, KeyError):
+    """No event with the requested ID exists in the store."""

@@ -622,7 +622,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P1.3 PayloadStore.** (ae39330)
   - **Do:** Write `mastrace/provenance/payload_store.py` with `put(text) -> "sha256:<hex>"`, `get(ref) -> str` and `verify(ref) -> bool`, stored under `payloads/<aa>/<hex>`. Writes are atomic: write to a temp file, then rename. Storing the same text twice creates one file.
   - **Acceptance:** tests for storing the same text twice, a corrupted file being detected, and a missing ref raising `PayloadMissing`.
-- [ ] **P1.4 Signer.**
+- [x] **P1.4 Signer.** (5c7b1e3)
   - **Do:** Write `mastrace/provenance/signer.py`: load or create the Ed25519 key in `data/keys/` (file mode `0600`), with `sign(record_hash) -> str` and `verify(record_hash, sig, pubkey) -> bool`.
   - **Acceptance:** a signature made with a different key fails verification. The key file has permissions `0600`.
 - [ ] **P1.5 EventStore.**
@@ -1001,6 +1001,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P1.1 · bc32117 · core/schemas.py; GraphConfig rules 1-6 as validators, 7-8 as check_resources/check_scripted_feedback
 - 2026-10-05 · P1.2 · f899cf5 · core/canonical.py: canonical_json, sha256_hex, request_hash_model/tool
 - 2026-10-05 · P1.3 · ae39330 · provenance/payload_store.py: atomic, idempotent put; verify; PayloadMissing
+- 2026-10-05 · P1.4 · 5c7b1e3 · provenance/signer.py: key 0600 + .pub file; signs raw record-hash bytes
 
 ---
 
