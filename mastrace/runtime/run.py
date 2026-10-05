@@ -8,11 +8,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from mastrace.analysis.detectors import Detectors
 from mastrace.core.errors import RunExists
 from mastrace.core.logging import code_version, get_logger
 from mastrace.core.protocol import render_task
 from mastrace.core.schemas import (
     EventKind,
+    EventRecord,
     GraphConfig,
     Override,
     RunManifest,
@@ -89,6 +91,7 @@ def run_once(
     on_commit: Sequence[CommitHook] = (),
     overwrite: bool = False,
     replay_of: str | None = None,
+    replay_salt: str | None = None,
 ) -> RunResult:
     """Run one configuration end to end and verify its log.
 
@@ -141,6 +144,8 @@ def run_once(
         status="running",
         env_snapshot_hash=snapshot,
         replay_of=replay_of,
+        policy_overrides=dict(policy_overrides or {}),
+        feedback_rounds=feedback_rounds,
     )
     _write_manifest(run_dir, manifest)
 
@@ -167,6 +172,7 @@ def run_once(
         temperature=model_cfg.temperature,
         max_tokens=model_cfg.max_tokens,
         seed=seed,
+        replay_salt=replay_salt,
     )
     tool_gw = ToolGateway(
         env_dir, snapshot, {a.id: a.tools for a in cfg.agents}, cache=cache, overrides=overrides
@@ -174,7 +180,13 @@ def run_once(
     router = Router(cfg, recorder, budget, overrides)
     prompts = {a.id: render_system_prompt(cfg, a.id, task.allowed_recipients) for a in cfg.agents}
     runner = AgentRunner(cfg, model_gw, tool_gw, prompts)
-    ctx = RunContext(cfg, router, runner, recorder, budget, on_commit=list(on_commit))
+    detectors = Detectors(task.allowed_recipients, recorder.payloads)
+
+    def detect(events: list[EventRecord]) -> None:
+        for alert in detectors.scan(events):
+            store.add_alert(alert)
+
+    ctx = RunContext(cfg, router, runner, recorder, budget, on_commit=[detect, *on_commit])
 
     recorder.record_now(
         EventDraft(

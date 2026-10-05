@@ -139,3 +139,25 @@ def test_cache_key_depends_on_provider_identity(tmp_path: Path) -> None:
     a = ScriptedProvider("gullible")
     b = ScriptedProvider("gullible", policy_overrides={"C": "resistant"})
     assert a.identity != b.identity
+
+
+def test_replay_salt_isolates_replays(tmp_path: Path) -> None:
+    """Pre-override calls hit the recorded entry; post-override calls are per-replay."""
+    cache = ResponseCache(tmp_path / "cache.sqlite")
+    spy = SpyProvider()
+
+    def gw_(mode: Mode, salt: str | None) -> ModelGateway:
+        return ModelGateway(spy, cache, TokenBudget(10_000), mode=mode, seed=1, replay_salt=salt)
+
+    recorded = gw_("record", None).call("A", "A#1", 0, MSGS, [], buf()).text
+    assert recorded == "answer 1"
+    new_msgs = [*MSGS, ChatMessage(role="user", content="diverged")]
+    r1 = gw_("replay", "r1")
+    r2 = gw_("replay", "r2")
+    assert r1.call("A", "A#1", 0, MSGS, [], buf()).text == recorded  # recorded entry
+    assert r2.call("A", "A#1", 0, MSGS, [], buf()).text == recorded
+    a = r1.call("A", "A#1", 1, new_msgs, [], buf()).text
+    b = r2.call("A", "A#1", 1, new_msgs, [], buf()).text
+    assert (a, b) == ("answer 2", "answer 3")  # live each time, not shared
+    assert gw_("replay", "r1").call("A", "A#1", 1, new_msgs, [], buf()).text == a  # stable
+    assert len(spy.calls) == 3

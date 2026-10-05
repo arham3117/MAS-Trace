@@ -126,6 +126,8 @@ class RunManifest(_Model):
     status: str = "created"
     env_snapshot_hash: str | None = None
     replay_of: str | None = None
+    policy_overrides: dict[str, str] = Field(default_factory=dict)  # scripted provider only
+    feedback_rounds: int = 1  # scripted provider only
 
 
 class Alert(_Model):

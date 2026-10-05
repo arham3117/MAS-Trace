@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal
 
-from mastrace.core.canonical import canonical_json, request_hash_model
+from mastrace.core.canonical import canonical_json, request_hash_model, sha256_hex
 from mastrace.core.errors import CacheMiss
 from mastrace.core.ids import parse_turn_id
 from mastrace.core.schemas import (
@@ -51,7 +51,12 @@ class ModelGateway:
         temperature: float = 0.0,
         max_tokens: int = 1024,
         seed: int | None = None,
+        replay_salt: str | None = None,
     ) -> None:
+        """`replay_salt` (replay mode, ISSUE-008) keeps independent replays independent:
+        reads hit the salted entry or an entry written by a `record` run, and live answers
+        are stored under the salted key, so replay k never reuses replay j's live calls."""
+        self.replay_salt = replay_salt
         self.provider = provider
         self.cache = cache
         self.budget = budget
@@ -116,7 +121,15 @@ class ModelGateway:
             )
             meta["override"] = True
         else:
-            cached = self.cache.get_model(rhash)
+            if self.replay_salt is None:
+                cached = self.cache.get_model(rhash)
+                store_key, origin = rhash, ("replay" if self.mode != "record" else "record")
+            else:
+                store_key = sha256_hex(f"{rhash}|{self.replay_salt}")
+                cached = self.cache.get_model(store_key) or self.cache.get_model(
+                    rhash, origin="record"
+                )
+                origin = f"replay:{self.replay_salt}"
             if cached is not None:
                 response = cached
                 meta["cache_hit"] = True
@@ -125,7 +138,9 @@ class ModelGateway:
                     raise CacheMiss(f"no cached response for {agent_id} {turn_id}/{call_index}")
                 response = self.provider.complete(request)
                 self._live_calls += 1
-                self.cache.put_model(rhash, request.model, canonical_json(msg_dicts), response)
+                self.cache.put_model(
+                    store_key, request.model, canonical_json(msg_dicts), response, origin
+                )
                 meta["cache_miss"] = self.mode == "replay"
         meta["tokens"] = {
             "prompt": response.prompt_tokens,

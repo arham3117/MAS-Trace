@@ -778,7 +778,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - Unit tests on synthetic events.
     - **No alerts on all 10 clean scripted runs.**
     - D1 fires on a `g1s0` gullible run.
-- [ ] **P6.3 Symptom oracle.**
+- [x] **P6.3 Symptom oracle.** (0d56762)
   - **Do:** Write `mastrace/evaluation/symptom_oracle.py`, following §7.10, plus `make_symptom_check(run_id)`, which returns a callable for replays.
   - **Acceptance:** it returns the `send_email` event for G1 and the `final_output` event for G2, and `None` for clean runs.
 
@@ -1025,6 +1025,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P5.4 · 32136b0 · transitive import graph check + model-gateway caller check; both shown to catch planted violations
 - 2026-10-05 · P6.1 · 43840f2 · EventGraph (code landed in P5.3): BFS visited-on-enqueue, simple_paths over causal messages
 - 2026-10-05 · P6.2 · 7e7aab1 · analysis/detectors.py + configs/detectors.yaml; no alerts on 10 clean scripted runs; D1 fires on g1s0
+- 2026-10-05 · P6.3 · 0d56762 · evaluation/symptom_oracle.py: G1 leaking send_email, G2 final_output; make_symptom_check(run_id)
 
 ---
 
