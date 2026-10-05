@@ -1,0 +1,24 @@
+# Model keys -> provider settings (plan.md §2, P0.3).
+# Exact model names are chosen by the team; values below are placeholders until then.
+models:
+  scripted_gullible:
+    provider: scripted
+    policy: gullible
+
+  scripted_resistant:
+    provider: scripted
+    policy: resistant
+
+  dev_open:
+    provider: litellm
+    model: ollama/qwen2.5:7b-instruct   # placeholder; the team picks the open-weight model
+    api_base_env: OLLAMA_BASE_URL        # read from the environment / .env
+    temperature: 0
+    seed_supported: true
+    max_tokens: 1024
+
+  commercial:
+    # Placeholder, left empty until the team chooses the model and budget (P13.3).
+    provider: litellm
+    model: null
+    temperature: 0

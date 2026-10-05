@@ -583,7 +583,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - `gate STAGE=n`
     - `clean`
   - **Acceptance:** `make install && make check` passes on the empty project.
-- [ ] **P0.2 Working files.**
+- [x] **P0.2 Working files.** (c68a809)
   - **Do:** Create `CLAUDE.md` (Appendix B) and `issue.md` (Appendix A, with an empty index).
   - **Do:** Create `.gitignore` (`data/`, `.env`, `reports/results/raw/`, `__pycache__`, `.venv`) and `.env.example` (`OLLAMA_BASE_URL`, `VLLM_BASE_URL`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`).
   - **Do:** Write a `README.md` with quick-start commands.
@@ -994,6 +994,7 @@ Append one line per completed task or significant event, newest last:
 `- YYYY-MM-DD · P<phase>.<task> · <commit> · <one-line note>`
 
 - 2026-10-05 · P0.1 · 04eb3c3 · skeleton, pyproject (Python 3.12 pinned), Makefile; `make check` green; see ISSUE-001
+- 2026-10-05 · P0.2 · c68a809 · CLAUDE.md, .gitignore, .env.example, README
 
 ---
 

@@ -17,6 +17,7 @@ Rules are in `plan.md` §0.3:
 | ID | Title | Type | Severity | Status | Task | Opened | Resolved |
 |---|---|---|---|---|---|---|---|
 | ISSUE-001 | Project setup choices for P0.1 | decision | Low | Resolved | P0.1 | 2026-10-05 | 2026-10-05 |
+| ISSUE-002 | Model config schema and placeholder dev model | decision | Low | Resolved | P0.3 | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -43,6 +44,29 @@ Installed versions at setup: langgraph 1.2.13, litellm 1.104.0, pydantic 2.13.5.
 - Date: 2026-10-05
 - Fix: recorded as decisions; no code defect.
 - Regression test: n/a (decision).
+
+---
+
+## ISSUE-002: Model config schema and placeholder dev model
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** Resolved
+- **Task / phase:** P0.3
+- **Opened:** 2026-10-05
+
+**What happened**
+P0.3 does not fix the `models.yaml` schema or the dev model name. These choices were made:
+1. **Schema.** `models.yaml` has a top-level `models:` mapping. Each entry has `provider` (`scripted` or `litellm`), plus `policy` (scripted only), or `model`, `api_base_env`, `temperature`, `seed_supported` and `max_tokens`.
+2. **API base.** The base URL is stored as the **name** of an environment variable (`api_base_env: OLLAMA_BASE_URL`). It is resolved from the process environment, then from `.env`.
+3. **Placeholder model.** `dev_open.model` is set to `ollama/qwen2.5:7b-instruct` until the team chooses a model (§2 says the team picks it).
+4. **Commercial key.** `commercial` loads with `model: null`. `ModelConfig.configured` is False until P13.3.
+5. **Default key.** `Settings.default_model_key` defaults to `dev_open`.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: recorded as decisions. **The team should confirm the `dev_open` model name** before P4.5.
+- Regression test: `tests/unit/test_settings.py` (schema and key loading).
 
 ---
 
