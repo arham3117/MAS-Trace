@@ -742,7 +742,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P4.4 Checkers.** (8576012)
   - **Do:** Write `utility`, `goal_g1` and `goal_g2` in `mastrace/environment/checkers.py`.
   - **Acceptance:** unit tests run against hand-made outboxes and outputs.
-- [ ] **P4.5 Clean baseline.**
+- [x] **P4.5 Clean baseline.** (ef65231)
   - **Do:** Run `t01`–`t10` on `s1_chain`, clean, with `scripted_gullible` and then with `dev_open`. Save the utility table to `reports/baselines/clean_s1_chain.md`.
   - **Acceptance:** scripted utility is 100%. If `dev_open` utility is below 50%, log a `spec-gap` issue about the prompts, improve them, and re-run (at most 3 iterations, then mark it `Blocked`).
 
@@ -1018,6 +1018,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P4.2 · 662011d · prompts (written in P3.1) + snapshot tests; prompts carry no injection defence (neutral baseline)
 - 2026-10-05 · P4.3 · bbde31e · 10 tasks (2-3 sources + 1 sources_2 page each, 3 FACT lines/page); validation test also proves pages trigger no scripted instruction rule; 70 scripted runs at 100% utility
 - 2026-10-05 · P4.4 · 8576012 · environment/checkers.py; goal_g2 takes the marker string (attack spec lookup happens in the resolver)
+- 2026-10-05 · P4.5 · ef65231 · clean baseline: scripted 100%, dev_open 73% after 2 prompt iterations (ISSUE-009); dev model switched to installed qwen2.5:14b with num_ctx 16384
 
 ---
 
