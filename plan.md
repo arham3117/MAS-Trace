@@ -730,7 +730,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 4: Environment, roles and tasks
 
-- [ ] **P4.1 Environment materializer.**
+- [x] **P4.1 Environment materializer.** (a7a8f84)
   - **Do:** Write `mastrace/environment/materializer.py`: copy the template into the run's `env/`, substitute `{{CANARY}}`, and write `env_snapshot_hash` to the manifest.
   - **Acceptance:** the canary appears only in `credentials.txt`. The snapshot hash is stable for the same inputs.
 - [ ] **P4.2 Role prompts and protocol.**
@@ -1014,6 +1014,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P3.3 · f01092e · runtime/context_builder.py + agent_runner.py (+ prompts.py, environment/materializer.py, tasks.py, tests/fixtures/env/t_test)
 - 2026-10-05 · P3.4 · 60becea · runtime/langgraph_app.py; LangGraph 1.2.13 names match plan; runtime objects in RunContext, plain snapshot in state
 - 2026-10-05 · P3.5 · ee55542 · runtime/run.py + `mastrace run`; crash recorded in run_end then re-raised; all 7 configs complete scripted; Phase 3 complete
+- 2026-10-05 · P4.1 · a7a8f84 · materializer (code landed in P3.3): canary from seed, only in credentials.txt; snapshot hash excludes outbox
 
 ---
 
