@@ -21,6 +21,8 @@ Rules are in `plan.md` §0.3:
 | ISSUE-003 | Scope of the `no_network` fixture | decision | Low | Resolved | P0.4 | 2026-10-05 | 2026-10-05 |
 | ISSUE-004 | Recorder design: local refs, clock, signature bytes and tamper triggers | decision | Low | Resolved | P1.6 | 2026-10-05 | 2026-10-05 |
 | ISSUE-005 | Prompt/text contract and ScriptedProvider details | decision | Low | Resolved | P2.1 | 2026-10-05 | 2026-10-05 |
+| ISSUE-006 | `s3_whiteboard` layout is unknown | spec-gap | Medium | Open | P3.1 | 2026-10-05 | |
+| ISSUE-007 | Run IDs contain the attack ID, and every event ID contains the run ID | spec-gap | Low | Open | P5.2 | 2026-10-05 | |
 
 ---
 
@@ -142,6 +144,47 @@ P1.4–P1.6 leave several details open. These choices were made:
 - Date: 2026-10-05
 - Fix: recorded as decisions and documented in `tests/fixtures/scripted_policies.md`.
 - Regression test: `tests/unit/test_scripted_provider.py`
+
+---
+
+## ISSUE-006: `s3_whiteboard` layout is unknown
+
+- **Type:** spec-gap
+- **Severity:** Medium
+- **Status:** Open
+- **Task / phase:** P3.1
+- **Opened:** 2026-10-05
+
+**What happened**
+§6 lists `s3_whiteboard.yaml` as "the team's whiteboard layout, 5 agents", but the layout is not written down anywhere in the repo.
+
+**Expected vs actual**
+- Expected: the team's layout.
+- Actual: a valid placeholder Stage 3 layout is committed: A→B, A↔C, B→D, C→D, D↔E. Its description is marked `PLACEHOLDER` so all 7 configs load.
+
+**Workaround (if any)**
+The placeholder is used. No gate check depends on `s3_whiteboard` specifically, but `full.yaml` (Phase 13) runs it.
+
+**Needs from the human:** the whiteboard layout: links and their types, roles, and entry and sink agents.
+
+---
+
+## ISSUE-007: Run IDs contain the attack ID, and every event ID contains the run ID
+
+- **Type:** spec-gap
+- **Severity:** Low
+- **Status:** Open
+- **Task / phase:** P3.5 / P5.2
+- **Opened:** 2026-10-05
+
+**What happened**
+§7.5 fixes the run ID format as `<config>-<task>-<attack|clean>-<model>-s<seed>`, and §7.4 makes every `event_id` `<run_id>:<seq>`. So the attack ID (e.g. `g1s0`) appears in every event of an attack run. P5.2's acceptance test says the run's `events.sqlite` must not contain the attack ID string. Taken literally, the two conflict.
+
+**Proposed resolution (applied unless the human objects)**
+1. Keep the §7.5 run ID format, because it is useful for humans and for `--resume`.
+2. The P5.2 test scans every event field **except identifiers** (`event_id`, `run_id`, `built_from`, payload refs) and every payload file for the attack ID and the attacker email. It runs on a `scripted_resistant` run, where no agent acts on the payload. The poisoned page payload necessarily contains the attacker's text, so it is excluded.
+3. Analysis code never parses run IDs. A static check is added to `test_boundaries.py` in P5.4: no `run_id.split`/attack-ID regex under `mastrace/analysis/`.
+4. Alternative, if the team prefers: use an opaque deterministic run ID (a hash of the run tuple) in events, and keep the readable name only as the directory name and in `manifest.json`.
 
 ---
 

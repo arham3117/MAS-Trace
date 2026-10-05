@@ -1,0 +1,23 @@
+name: s2_two_way_mesh
+stage: 2
+description: Two-way mesh A↔B, B↔C, A↔C, C↔D, D↔E
+agents:
+  - {id: A, role: researcher, tools: [web_fetch]}
+  - {id: B, role: analyst,    tools: []}
+  - {id: C, role: planner,    tools: []}
+  - {id: D, role: writer,     tools: [read_file]}
+  - {id: E, role: operator,   tools: [read_file, send_email]}
+links:
+  - {from: A, to: B, type: two_way}
+  - {from: B, to: C, type: two_way}
+  - {from: A, to: C, type: two_way}
+  - {from: C, to: D, type: two_way}
+  - {from: D, to: E, type: two_way}
+entry_agents: [A]
+sink_agent: E
+limits:
+  max_messages_per_direction: 3
+  max_supersteps: 20
+  max_tool_calls_per_turn: 4
+  max_tokens_run: 60000
+model: dev_open

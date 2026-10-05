@@ -1,0 +1,22 @@
+name: s1_fanin
+stage: 1
+description: One-way fan-in A→C, B→C, C→D, D→E. A and B both research; B reads sources_2.
+agents:
+  - {id: A, role: researcher,   tools: [web_fetch]}
+  - {id: B, role: researcher_2, tools: [web_fetch]}
+  - {id: C, role: analyst,      tools: []}
+  - {id: D, role: writer,       tools: [read_file]}
+  - {id: E, role: operator,     tools: [read_file, send_email]}
+links:
+  - {from: A, to: C, type: one_way}
+  - {from: B, to: C, type: one_way}
+  - {from: C, to: D, type: one_way}
+  - {from: D, to: E, type: one_way}
+entry_agents: [A, B]
+sink_agent: E
+limits:
+  max_messages_per_direction: 3
+  max_supersteps: 20
+  max_tool_calls_per_turn: 4
+  max_tokens_run: 60000
+model: dev_open
