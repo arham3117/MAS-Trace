@@ -11,11 +11,13 @@ models:
 
   dev_open:
     provider: litellm
-    model: ollama/qwen2.5:7b-instruct   # placeholder; the team picks the open-weight model
+    model: ollama_chat/qwen2.5:14b-instruct-q4_K_M   # installed locally; team to confirm (ISSUE-002)
     api_base_env: OLLAMA_BASE_URL        # read from the environment / .env
     temperature: 0
     seed_supported: true
     max_tokens: 1024
+    extra_params:
+      num_ctx: 16384                     # Ollama's default context (2048) silently truncates prompts
 
   commercial:
     # Placeholder, left empty until the team chooses the model and budget (P13.3).

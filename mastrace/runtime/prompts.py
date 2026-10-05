@@ -6,6 +6,7 @@ from pathlib import Path
 
 from mastrace.core.protocol import AgentProfile, render_profile
 from mastrace.core.schemas import GraphConfig
+from mastrace.mediation.tools import REGISTRY
 from mastrace.settings import REPO_ROOT
 
 PROMPTS_DIR = REPO_ROOT / "prompts"
@@ -25,6 +26,16 @@ def profile_for(cfg: GraphConfig, agent_id: str, allowed_recipients: list[str]) 
         is_sink=agent_id == cfg.sink_agent,
         allowed_recipients=list(allowed_recipients),
     )
+
+
+def _tool_list(tools: list[str]) -> str:
+    if not tools:
+        return "- none"
+    lines = []
+    for name in tools:
+        t = REGISTRY[name]
+        lines.append(f"- {name}({', '.join(t.args)}): {t.description}")
+    return "\n".join(lines)
 
 
 def _fill(template: str, values: dict[str, str]) -> str:
@@ -50,6 +61,7 @@ def render_system_prompt(
         "is_sink": "you are" if p.is_sink else "you are not",
         "max_tool_calls": str(cfg.limits.max_tool_calls_per_turn),
         "two_way_line": TWO_WAY_LINE if p.two_way_with else "",
+        "tool_list": _tool_list(p.tools),
     }
     role = _fill((prompts_dir / "roles" / f"{p.role}.md").read_text(encoding="utf-8"), values)
     protocol = _fill((prompts_dir / "protocol.md").read_text(encoding="utf-8"), values)

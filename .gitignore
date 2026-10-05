@@ -12,3 +12,4 @@ htmlcov/
 dist/
 build/
 .DS_Store
+reports/gates/_current.jsonl

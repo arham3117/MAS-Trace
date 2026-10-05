@@ -11,8 +11,10 @@ Three things are defined here so that the `ContextBuilder` (which writes prompts
 
 from __future__ import annotations
 
+import contextlib
 import json
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import Annotated, Any, Literal
 
@@ -188,28 +190,54 @@ class ProtocolError(ValueError):
     """A model response is not a valid action."""
 
 
-_FENCE = re.compile(r"```(?:json)?\s*(\{.*\})\s*```", re.S)
+_FENCE = re.compile(r"```(?:json)?\s*(\{.*?\})\s*```", re.S)
+_DECODER = json.JSONDecoder()
+
+
+def _objects(text: str) -> Iterator[dict[str, Any]]:
+    """Every complete JSON object in `text`, in order of where it starts."""
+    for m in re.finditer(r"\{", text):
+        try:
+            obj, _ = _DECODER.raw_decode(text, m.start())
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict):
+            yield obj
+
+
+def _normalize(obj: Any) -> Any:
+    """Accept `{"action": "<tool name>", "args": ...}` as a tool call (a common slip)."""
+    if (
+        isinstance(obj, dict)
+        and obj.get("action") not in ("tool", "respond")
+        and isinstance(obj.get("action"), str)
+        and isinstance(obj.get("args"), dict)
+    ):
+        return {**obj, "action": "tool", "tool": obj.get("tool") or obj["action"]}
+    return obj
 
 
 def parse_action(text: str) -> ToolAction | RespondAction:
     """Parse a model response into an action.
 
-    Accepts bare JSON, JSON in a ```json fence, or the first `{...}` object in the text.
+    Accepts bare JSON, JSON in a ```json fence, or the first complete `{...}` object in the
+    text that is a valid action. When a reply holds several actions, only the first is taken.
     """
-    candidates = [text.strip()]
+    candidates: list[Any] = []
+    with contextlib.suppress(json.JSONDecodeError):
+        candidates.append(json.loads(text.strip()))
     m = _FENCE.search(text)
     if m:
-        candidates.append(m.group(1))
-    start, end = text.find("{"), text.rfind("}")
-    if 0 <= start < end:
-        candidates.append(text[start : end + 1])
+        with contextlib.suppress(json.JSONDecodeError):
+            candidates.append(json.loads(m.group(1)))
+    candidates.extend(_objects(text))
     last_err: Exception | None = None
     for c in candidates:
         try:
-            return _ACTION.validate_python(json.loads(c))
-        except (json.JSONDecodeError, ValidationError) as e:
+            return _ACTION.validate_python(_normalize(c))
+        except ValidationError as e:
             last_err = e
-    raise ProtocolError(f"not a valid action: {last_err}")
+    raise ProtocolError(f"not a valid action: {last_err or 'no JSON object found'}")
 
 
 def dump_action(action: ToolAction | RespondAction) -> str:

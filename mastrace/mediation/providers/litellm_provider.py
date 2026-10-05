@@ -41,7 +41,8 @@ class LiteLLMProvider:
         if cfg.provider != "litellm" or not cfg.model:
             raise ConfigError(f"model key {cfg.key!r} is not a configured litellm model")
         self.cfg = cfg
-        self.identity = cfg.model
+        extras = ",".join(f"{k}={v}" for k, v in sorted(cfg.extra_params.items()))
+        self.identity = cfg.model + (f"[{extras}]" if extras else "")
         self.max_retries = max_retries
         self._sleep = sleep
         self._completion = completion or litellm.completion
@@ -55,6 +56,7 @@ class LiteLLMProvider:
         }
         if self.cfg.seed_supported and request.seed is not None:
             kwargs["seed"] = request.seed
+        kwargs.update(self.cfg.extra_params)
         base = self.cfg.api_base()
         if base:
             kwargs["api_base"] = base

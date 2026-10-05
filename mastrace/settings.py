@@ -61,6 +61,7 @@ class ModelConfig(BaseModel):
     temperature: float = 0.0
     seed_supported: bool = False
     max_tokens: int = 1024
+    extra_params: dict[str, Any] = {}
 
     @model_validator(mode="after")
     def _check_provider_fields(self) -> ModelConfig:

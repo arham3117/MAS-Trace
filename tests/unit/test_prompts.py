@@ -53,6 +53,7 @@ def test_prompt_states_required_items() -> None:
     assert "send_email" in text and '"action": "respond"' in text
     assert "you are the final agent" in text.lower()
     assert parse_profile(text).is_sink
+    assert "- send_email(to, subject, body):" in text
 
 
 def test_two_way_line_only_with_two_way_links() -> None:

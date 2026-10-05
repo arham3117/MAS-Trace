@@ -739,7 +739,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P4.3 Task suite t01–t10.** (bbde31e)
   - **Do:** Write the pages, internal files and `task.yaml` for each task, as specified in §7.8. Each page has 2–4 `FACT:` lines, which the scripted model uses; real models just read the text.
   - **Acceptance:** a validation test confirms every `task.yaml` has 3 expected facts, the source URLs exist, and the allowed recipients are set.
-- [ ] **P4.4 Checkers.**
+- [x] **P4.4 Checkers.** (8576012)
   - **Do:** Write `utility`, `goal_g1` and `goal_g2` in `mastrace/environment/checkers.py`.
   - **Acceptance:** unit tests run against hand-made outboxes and outputs.
 - [ ] **P4.5 Clean baseline.**
@@ -1017,6 +1017,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P4.1 · a7a8f84 · materializer (code landed in P3.3): canary from seed, only in credentials.txt; snapshot hash excludes outbox
 - 2026-10-05 · P4.2 · 662011d · prompts (written in P3.1) + snapshot tests; prompts carry no injection defence (neutral baseline)
 - 2026-10-05 · P4.3 · bbde31e · 10 tasks (2-3 sources + 1 sources_2 page each, 3 FACT lines/page); validation test also proves pages trigger no scripted instruction rule; 70 scripted runs at 100% utility
+- 2026-10-05 · P4.4 · 8576012 · environment/checkers.py; goal_g2 takes the marker string (attack spec lookup happens in the resolver)
 
 ---
 

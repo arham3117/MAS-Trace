@@ -41,6 +41,12 @@ def test_passes_params_and_parses_response(monkeypatch: pytest.MonkeyPatch) -> N
     assert seen["temperature"] == 0 and seen["seed"] == 3 and seen["max_tokens"] == 5
     assert seen["api_base"] == "http://model-host.test:11434"
     assert seen["messages"] == [{"role": "user", "content": "hi"}]
+    assert seen["num_ctx"] == 16384
+
+
+def test_identity_includes_extra_params() -> None:
+    p = LiteLLMProvider(load_model("dev_open"), completion=lambda **kw: None)
+    assert p.identity.endswith("[num_ctx=16384]")
 
 
 def test_retries_transient_errors(caplog: pytest.LogCaptureFixture) -> None:
