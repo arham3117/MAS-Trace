@@ -666,7 +666,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - `strict_replay` with no cache entry raises `CacheMiss`.
     - A `model_output` override is applied.
     - Exceeding the budget raises `BudgetExceeded`.
-- [ ] **P2.3 Tool registry and tool gateway.**
+- [x] **P2.3 Tool registry and tool gateway.** (4fbea65)
   - **Do:** Write `mastrace/mediation/tool_gateway.py` and `tools/{web_fetch,read_file,send_email}.py`, following §7.8.
   - **Do:** The gateway:
     - checks that the agent was granted the tool (if not: event with `meta.status="denied"`, and a denial message is returned to the agent),
@@ -1007,6 +1007,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P1.7 · 773d004 · provenance/verifier.py + `mastrace verify-log`; detects edits, deletes, reorders, payload changes, bad sigs, truncation (via summary); Phase 1 complete
 - 2026-10-05 · P2.1 · c43dc65 · core/protocol.py contract; ScriptedProvider (§7.13) + LiteLLMProvider with 3 retries; policies doc (ISSUE-005)
 - 2026-10-05 · P2.2 · 0d1ae1b · mediation/model_gateway.py + cache.py + budget.py; cache key uses provider identity; call() takes the turn buffer and returns the event ref
+- 2026-10-05 · P2.3 · 4fbea65 · tool_gateway.py + tools/ (web_fetch, read_file, send_email, memory_*); read tools cached, action tools always run
 
 ---
 
