@@ -1,0 +1,72 @@
+[project]
+name = "mastrace"
+version = "0.1.0"
+description = "MAS-Trace testbed: staged multi-agent orchestration with provenance logging and attack attribution"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=1.0",
+    "litellm",
+    "pydantic>=2",
+    "pydantic-settings",
+    "pynacl",
+    "networkx",
+    "pyyaml",
+    "typer",
+    "rich",
+    "pandas",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+otel = ["opentelemetry-sdk", "opentelemetry-exporter-otlp"]
+
+[project.scripts]
+mastrace = "mastrace.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "types-pyyaml",
+    "pandas-stubs",
+    "types-networkx",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mastrace"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["literature_review", "*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["mastrace", "tests"]
+ignore_missing_imports = true
+warn_unused_configs = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["mastrace.core.*", "mastrace.provenance.*"]
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "plumbing: deterministic checks that use the scripted provider only",
+    "model: needs a reachable real model (dev_open / commercial)",
+    "slow: long-running tests",
+    "gate: stage gate checks (plan.md §9)",
+]

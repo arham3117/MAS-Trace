@@ -1,0 +1,86 @@
+# Issue log
+
+Rules are in `plan.md` §0.3:
+
+- Log immediately.
+- IDs are sequential and are never reused or deleted.
+- Update the index and the entry together.
+- Resolve only with a regression test.
+- After 3 failed attempts, mark the issue Blocked.
+
+**Status values:** Open · In progress · Blocked · Resolved · Won't fix · Reopened
+**Severity values:** Blocker · High · Medium · Low
+**Type values:** bug · env · api-mismatch · spec-gap · decision · decision-change · flaky-test · gate-failure · performance
+
+## Index
+
+| ID | Title | Type | Severity | Status | Task | Opened | Resolved |
+|---|---|---|---|---|---|---|---|
+| ISSUE-001 | Project setup choices for P0.1 | decision | Low | Resolved | P0.1 | 2026-10-05 | 2026-10-05 |
+
+---
+
+## ISSUE-001: Project setup choices for P0.1
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** Resolved
+- **Task / phase:** P0.1
+- **Opened:** 2026-10-05
+
+**What happened**
+P0.1 left several setup details open. These choices were made:
+1. **Repo root.** The repo root is the existing `AI-Orchestration/` directory. A nested `mas-trace-testbed/` directory (§6) is not created. Paths in §6 are read relative to this root.
+2. **Interpreter.** `.python-version` pins Python 3.12. The machine default is 3.14, which is too new for some dependencies (litellm and its transitive packages). `requires-python` stays `>=3.11`, as §2 requires.
+3. **Ruff scope.** Ruff excludes `*.md`, because recent ruff formats the Python snippets in `plan.md`.
+4. **Mypy.** `strict` is on for `mastrace.core.*` and `mastrace.provenance.*` (§5). The rest uses `check_untyped_defs`.
+5. **Typer.** The CLI has a root callback so that `mastrace` stays a command group while it has only one command.
+6. **Commit hashes in ticks.** A commit cannot contain its own hash. Each task's tick and Progress-log line go into the **next** commit, which references the hash of the task's commit.
+
+Installed versions at setup: langgraph 1.2.13, litellm 1.104.0, pydantic 2.13.5.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: recorded as decisions; no code defect.
+- Regression test: n/a (decision).
+
+---
+
+<!--
+Copy this block for each new issue, directly below the last entry. Replace every <...>.
+
+## ISSUE-<NNN>: <short title>
+
+- **Type:** <type>
+- **Severity:** <severity>
+- **Status:** Open
+- **Task / phase:** <P#.#>
+- **Opened:** <YYYY-MM-DD>
+
+**What happened**
+<observed behaviour, short error message, where it happened>
+
+**How to reproduce**
+```bash
+<exact command(s)>
+```
+
+**Expected vs actual**
+- Expected: <...>
+- Actual: <...>
+
+**Suspected cause**
+<...>
+
+**Attempts** (append only)
+1. <YYYY-MM-DD>: tried <...>; result <...>
+
+**Workaround (if any)**
+<...>
+
+**Resolution** (fill when resolved)
+- Date: <YYYY-MM-DD>
+- Commit: <hash>
+- Fix: <what changed>
+- Regression test: `tests/...::test_name` (or why no test is possible)
+-->
