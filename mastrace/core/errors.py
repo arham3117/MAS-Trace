@@ -34,3 +34,7 @@ class OutOfOrderAppend(MastraceError):
 
 class EventNotFound(MastraceError, KeyError):
     """No event with the requested ID exists in the store."""
+
+
+class UnknownLocalRef(MastraceError):
+    """A `built_from` entry refers to a buffered event that was never committed."""

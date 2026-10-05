@@ -625,7 +625,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P1.4 Signer.** (5c7b1e3)
   - **Do:** Write `mastrace/provenance/signer.py`: load or create the Ed25519 key in `data/keys/` (file mode `0600`), with `sign(record_hash) -> str` and `verify(record_hash, sig, pubkey) -> bool`.
   - **Acceptance:** a signature made with a different key fails verification. The key file has permissions `0600`.
-- [ ] **P1.5 EventStore.**
+- [x] **P1.5 EventStore.** (e4ba433)
   - **Do:** Write `mastrace/provenance/event_store.py`, a per-run SQLite store with the `events`, `alerts`, `verdicts` and `run_summary` tables.
   - **Do:** The API is `append(record)`, `get(event_id)`, `iter(kind=None)`, `count()`, `last()`, `add_alert`, `add_verdict`, `set_summary`. There is no update or delete for events.
   - **Do:** Add indexes on `kind`, `actor`, `turn_id` and `seq`. Turn on WAL mode.
@@ -1002,6 +1002,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P1.2 · f899cf5 · core/canonical.py: canonical_json, sha256_hex, request_hash_model/tool
 - 2026-10-05 · P1.3 · ae39330 · provenance/payload_store.py: atomic, idempotent put; verify; PayloadMissing
 - 2026-10-05 · P1.4 · 5c7b1e3 · provenance/signer.py: key 0600 + .pub file; signs raw record-hash bytes
+- 2026-10-05 · P1.5 · e4ba433 · provenance/event_store.py: WAL, indexes, triggers block UPDATE/DELETE on events
 
 ---
 

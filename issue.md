@@ -19,6 +19,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-001 | Project setup choices for P0.1 | decision | Low | Resolved | P0.1 | 2026-10-05 | 2026-10-05 |
 | ISSUE-002 | Model config schema and placeholder dev model | decision | Low | Resolved | P0.3 | 2026-10-05 | 2026-10-05 |
 | ISSUE-003 | Scope of the `no_network` fixture | decision | Low | Resolved | P0.4 | 2026-10-05 | 2026-10-05 |
+| ISSUE-004 | Recorder design: local refs, clock, signature bytes and tamper triggers | decision | Low | Resolved | P1.6 | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -90,6 +91,29 @@ P0.4 says `no_network` "blocks `socket.socket.connect` except to hosts allowed i
 - Date: 2026-10-05
 - Fix: recorded as decision.
 - Regression test: `tests/unit/test_fixtures.py`
+
+---
+
+## ISSUE-004: Recorder design: local refs, clock, signature bytes and tamper triggers
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** Resolved
+- **Task / phase:** P1.4–P1.6
+- **Opened:** 2026-10-05
+
+**What happened**
+P1.4–P1.6 leave several details open. These choices were made:
+1. **Local refs.** Event IDs are assigned only at commit (end of superstep), but events within a turn reference each other in `built_from`. `EventBuffer.add` returns a local ref `local:<turn_id>:<k>`. `Recorder.commit` rewrites local refs to event IDs and keeps the mapping. Later router events, such as `message` events built from a turn's `model_call`, can therefore still use them.
+2. **Time and hashing.** `time` is part of the hashed record (§7.6 hashes everything except `record_hash` and `signature`). So "identical records regardless of arrival order" holds for a fixed clock. `Recorder` takes an injectable `clock`, and the test uses a constant. Replay matching (G-C3) compares `(kind, actor, turn_id, input_ref, output_ref)`, which excludes time, so this does not affect replay.
+3. **Signature input.** The Ed25519 signature covers the raw 32 bytes `bytes.fromhex(record_hash)`. The public key is also written to `data/keys/recorder_ed25519.pub`, so the verifier never needs the private key.
+4. **Database guard.** Besides having no UPDATE/DELETE code path, `events.sqlite` has triggers that abort any UPDATE or DELETE on `events`. Tamper tests (P1.7) drop the triggers first, as an attacker with file access could.
+5. **Extra helpers.** `EventStore` additionally exposes `append_many` (one transaction per commit), `alerts()`, `verdicts()`, `summary()` and a read-only mode. It has no update or delete for events.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: recorded as decisions.
+- Regression test: `tests/unit/test_recorder.py`, `tests/unit/test_event_store.py`
 
 ---
 
