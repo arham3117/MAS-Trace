@@ -761,7 +761,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P5.3 GT resolver.** (c7f79b9)
   - **Do:** Write `mastrace/groundtruth/resolver.py`, following §7.9: `entry_event`, `entry_turn`, `true_paths`, `attack_succeeded`.
   - **Acceptance:** on a `scripted_gullible` `s1_chain` `g1s0` run, `entry_turn == "A#1"`, `true_paths == [["A","B","C","D","E"]]` and `attack_succeeded is True`. With `scripted_resistant`, `attack_succeeded is False`.
-- [ ] **P5.4 Import boundary.**
+- [x] **P5.4 Import boundary.** (32136b0)
   - **Do:** Write `tests/unit/test_boundaries.py`, which checks two things statically, by scanning imports and string literals:
     1. No module under `mastrace/analysis/` imports `mastrace.groundtruth` or opens `ground_truth.sqlite` (I8).
     2. Only `mastrace/runtime/agent_runner.py` and `mastrace/analysis/investigator.py` may call `ModelGateway.call` (I2). Other modules may pass a gateway object along, for example `run_once` and `replay`, but may not call it.
@@ -1022,6 +1022,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P5.1 · cc8770d · attacks/ g1s0 g1s1 g2s0 g2s1 enabled; g1s2 g1s3 g2s2 g2s3 drafts gated to phase 13 (control/attacks.py)
 - 2026-10-05 · P5.2 · 6bbbbcf · control/injector.py + groundtruth/store.py; controller wires attacks; GT-free log test per ISSUE-007
 - 2026-10-05 · P5.3 · c7f79b9 · groundtruth/resolver.py (uses provenance/event_graph.py, P6.1); entry A#1, true path A..E on scripted g1s0
+- 2026-10-05 · P5.4 · 32136b0 · transitive import graph check + model-gateway caller check; both shown to catch planted violations
 
 ---
 
