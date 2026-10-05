@@ -654,7 +654,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
   - **Acceptance:**
     - Each scripted role and policy is tested with fixed prompts.
     - `LiteLLMProvider` has a test marked `model` that runs only if the dev model is reachable, and is skipped otherwise.
-- [ ] **P2.2 Model gateway.**
+- [x] **P2.2 Model gateway.** (0d1ae1b)
   - **Do:** Write `mastrace/mediation/model_gateway.py`.
     - `call(agent_id, turn_id, call_index, messages, built_from) -> ModelResponse`.
     - Handle the modes and overrides of §7.7 and the cache in `data/cache/model_cache.sqlite`.
@@ -1006,6 +1006,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P1.6 · 2fae584 · provenance/recorder.py + core/ids.py; local refs resolved at commit; 1000 events in 0.4s (ISSUE-004)
 - 2026-10-05 · P1.7 · 773d004 · provenance/verifier.py + `mastrace verify-log`; detects edits, deletes, reorders, payload changes, bad sigs, truncation (via summary); Phase 1 complete
 - 2026-10-05 · P2.1 · c43dc65 · core/protocol.py contract; ScriptedProvider (§7.13) + LiteLLMProvider with 3 retries; policies doc (ISSUE-005)
+- 2026-10-05 · P2.2 · 0d1ae1b · mediation/model_gateway.py + cache.py + budget.py; cache key uses provider identity; call() takes the turn buffer and returns the event ref
 
 ---
 
