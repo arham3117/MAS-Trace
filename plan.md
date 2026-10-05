@@ -588,7 +588,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
   - **Do:** Create `.gitignore` (`data/`, `.env`, `reports/results/raw/`, `__pycache__`, `.venv`) and `.env.example` (`OLLAMA_BASE_URL`, `VLLM_BASE_URL`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`).
   - **Do:** Write a `README.md` with quick-start commands.
   - **Acceptance:** the files exist, and `issue.md` matches the template.
-- [ ] **P0.3 Settings and model config.**
+- [x] **P0.3 Settings and model config.** (aa63d2d)
   - **Do:** Create `mastrace/settings.py` with `pydantic-settings`: data dir, cache path, keys dir, default model key.
   - **Do:** Create `configs/models.yaml` with these keys:
     - `scripted_gullible`, `scripted_resistant`
@@ -995,6 +995,7 @@ Append one line per completed task or significant event, newest last:
 
 - 2026-10-05 · P0.1 · 04eb3c3 · skeleton, pyproject (Python 3.12 pinned), Makefile; `make check` green; see ISSUE-001
 - 2026-10-05 · P0.2 · c68a809 · CLAUDE.md, .gitignore, .env.example, README
+- 2026-10-05 · P0.3 · aa63d2d · settings + models.yaml; dev_open model name is a placeholder (ISSUE-002)
 
 ---
 

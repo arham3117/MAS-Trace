@@ -18,6 +18,7 @@ Rules are in `plan.md` §0.3:
 |---|---|---|---|---|---|---|---|
 | ISSUE-001 | Project setup choices for P0.1 | decision | Low | Resolved | P0.1 | 2026-10-05 | 2026-10-05 |
 | ISSUE-002 | Model config schema and placeholder dev model | decision | Low | Resolved | P0.3 | 2026-10-05 | 2026-10-05 |
+| ISSUE-003 | Scope of the `no_network` fixture | decision | Low | Resolved | P0.4 | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -67,6 +68,28 @@ P0.3 does not fix the `models.yaml` schema or the dev model name. These choices 
 - Date: 2026-10-05
 - Fix: recorded as decisions. **The team should confirm the `dev_open` model name** before P4.5.
 - Regression test: `tests/unit/test_settings.py` (schema and key loading).
+
+---
+
+## ISSUE-003: Scope of the `no_network` fixture
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** Resolved
+- **Task / phase:** P0.4
+- **Opened:** 2026-10-05
+
+**What happened**
+P0.4 says `no_network` "blocks `socket.socket.connect` except to hosts allowed in the model config, and only when the test is marked `model`". The wording is ambiguous. It was read as follows:
+1. `no_network` is **autouse**, so every test blocks outbound connections, `connect` and `connect_ex` alike. This makes §0.4 ("No network access outside the gateways") hold everywhere.
+2. Only tests marked `model` get the exception for provider hosts: the hostnames of every `api_base` in `configs/models.yaml`, plus the IPs they resolve to.
+3. `AF_UNIX` sockets are never blocked, because they are local IPC and not network.
+4. The guard lives in `tests/netguard.py` (`NetworkGuard`, `NetworkBlockedError`), so gate check G-C5 can reuse it.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: recorded as decision.
+- Regression test: `tests/unit/test_fixtures.py`
 
 ---
 
