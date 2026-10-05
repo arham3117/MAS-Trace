@@ -804,7 +804,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P8.2 Gate test suites.** (5b6f33e)
   - **Do:** Write `tests/gates/test_gate_common.py` and `test_gate_stage{1,2,3}.py`, implementing every check in §9. Mark scripted checks `gate`+`plumbing` and real-model checks `gate`+`model`. Each check writes a JSON result line to `reports/gates/_current.jsonl`.
   - **Acceptance:** the stage 1 suite runs. Stage 2 and 3 suites may be skipped (`pytest.skip("stage not built")`) until their phase.
-- [ ] **P8.3 Controller CLI.**
+- [x] **P8.3 Controller CLI.** (33013c6)
   - **Do:** Write `mastrace/control/controller.py` and these CLI commands:
     - `mastrace gate --stage N` runs the common checks and every stage `≤ N`, then writes `reports/gates/stage<N>_<YYYY-MM-DD>.md` (template in §9.4).
     - `mastrace stage-status` shows the last gate result for each stage.
@@ -1031,6 +1031,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P7.3 · 34e0d5f · `mastrace trace` (+ --allow-disabled on run); live symptom check re-runs the firing detector
 - 2026-10-05 · P8.1 · 316d1ea · evaluation/scorer.py -> reports/results/raw/scores.csv
 - 2026-10-05 · P8.2 · 5b6f33e · tests/gates harness + common/stage1-3; all scripted checks pass for stages 1-3
+- 2026-10-05 · P8.3 · 33013c6 · control/gates.py; `mastrace gate --stage N [--plumbing-only]`, `stage-status`, make gate
 
 ---
 
