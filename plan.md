@@ -798,7 +798,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 8: Scorer, gate harness and controller
 
-- [ ] **P8.1 Scorer.**
+- [x] **P8.1 Scorer.** (316d1ea)
   - **Do:** Write `mastrace/evaluation/scorer.py`, following §7.12. It writes `reports/results/raw/scores.csv`, appending one row per (run, method).
   - **Acceptance:** unit tests with hand-made GT/verdict pairs cover each metric.
 - [ ] **P8.2 Gate test suites.**
@@ -1029,6 +1029,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P7.1 · 2d6bf2f · analysis/replay.py; G-C3 identical; manifest keeps scripted options; salted replays independent
 - 2026-10-05 · P7.2 · 98c1be3 · analysis/tracer.py + configs/tracer.yaml; chain/fanin/fanout/G2 verdicts correct; stage-3 path tests by distinguishing edge
 - 2026-10-05 · P7.3 · 34e0d5f · `mastrace trace` (+ --allow-disabled on run); live symptom check re-runs the firing detector
+- 2026-10-05 · P8.1 · 316d1ea · evaluation/scorer.py -> reports/results/raw/scores.csv
 
 ---
 
