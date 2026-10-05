@@ -704,7 +704,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - the termination decision of §7.2,
     - `stats()` counters of messages handled, for G-C1.
   - **Acceptance:** unit tests cover each reject reason, the per-direction limits on a two-way link, and a deterministic order under shuffled input.
-- [ ] **P3.3 ContextBuilder and AgentRunner.**
+- [x] **P3.3 ContextBuilder and AgentRunner.** (f01092e)
   - **Do:** Write `mastrace/runtime/context_builder.py`. It holds a per-agent history of `(source_event_id, role, text)` items, renders the message list for the model, and returns `built_from`.
   - **Do:** Write `mastrace/runtime/agent_runner.py` with `run_turn(agent_id, new_inbox_events) -> TurnResult`, following §7.3: protocol parsing, one retry, fallback, tool loop and message validation.
   - **Acceptance:**
@@ -1011,6 +1011,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P2.4 · 64c07a8 · mediation/memory.py: per-agent + shared/ namespace, versioned; events via tool gateway; Phase 2 complete
 - 2026-10-05 · P3.1 · 5a3d92f · 7 configs + runtime/graph_config.py; role prompts written early for rule 7; s3_whiteboard is a placeholder (ISSUE-006)
 - 2026-10-05 · P3.2 · af53cfa · mediation/router.py; message actor is agent:<sender>, rejects are actor router; drop_message overrides reject with reason dropped
+- 2026-10-05 · P3.3 · f01092e · runtime/context_builder.py + agent_runner.py (+ prompts.py, environment/materializer.py, tasks.py, tests/fixtures/env/t_test)
 
 ---
 
