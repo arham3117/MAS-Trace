@@ -784,7 +784,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 7: Replay engine and tracer
 
-- [ ] **P7.1 Replay engine.**
+- [x] **P7.1 Replay engine.** (2d6bf2f)
   - **Do:** Write `mastrace/analysis/replay.py` with `replay(run_id, overrides, n=1) -> list[str]` (the replay run IDs). It reuses the original manifest and `env/` copy, sets the gateways to `replay` mode, and names the runs `<run_id>__r<k>`.
   - **Acceptance:**
     - **Gate check G-C3:** a replay with no overrides reproduces the identical `(kind, actor, turn_id, input_ref, output_ref)` sequence.
@@ -1026,6 +1026,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P6.1 · 43840f2 · EventGraph (code landed in P5.3): BFS visited-on-enqueue, simple_paths over causal messages
 - 2026-10-05 · P6.2 · 7e7aab1 · analysis/detectors.py + configs/detectors.yaml; no alerts on 10 clean scripted runs; D1 fires on g1s0
 - 2026-10-05 · P6.3 · 0d56762 · evaluation/symptom_oracle.py: G1 leaking send_email, G2 final_output; make_symptom_check(run_id)
+- 2026-10-05 · P7.1 · 2d6bf2f · analysis/replay.py; G-C3 identical; manifest keeps scripted options; salted replays independent
 
 ---
 

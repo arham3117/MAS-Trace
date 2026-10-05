@@ -1,0 +1,11 @@
+# Tracer v1 (plan.md §7.11)
+top_k: 3
+replays_per_candidate:
+  scripted: 1
+  real: 3
+weights:
+  overlap: 0.6
+  pattern: 0.4
+ngram: 5
+max_paths: 5
+neutral_replacement: "[content unavailable]"
