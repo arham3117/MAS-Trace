@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     cache_path: Path | None = None
     keys_dir: Path | None = None
     models_config: Path = REPO_ROOT / "configs" / "models.yaml"
+    templates_dir: Path = REPO_ROOT / "env" / "templates"
     default_model_key: str = "dev_open"
 
     @model_validator(mode="after")

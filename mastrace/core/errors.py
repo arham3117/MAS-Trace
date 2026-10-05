@@ -46,3 +46,7 @@ class CacheMiss(MastraceError):
 
 class BudgetExceeded(MastraceError):
     """The run's token budget (`max_tokens_run`) was exceeded."""
+
+
+class RunExists(MastraceError):
+    """A run directory with this run ID already holds events."""

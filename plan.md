@@ -711,7 +711,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - With the scripted provider, a turn produces the expected events.
     - `built_from` of the 2nd model call includes the tool event from the 1st (`test_built_from_complete`).
     - The parse-failure path is exercised with a provider that returns broken JSON.
-- [ ] **P3.4 LangGraph app.**
+- [x] **P3.4 LangGraph app.** (60becea)
   - **Do:** Write `mastrace/runtime/langgraph_app.py`.
     - The state holds inboxes, superstep, counters, tokens, status and final output.
     - Nodes are `router` and `agents_step`. A conditional edge from `router` goes to `agents_step` or `END`.
@@ -1012,6 +1012,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P3.1 · 5a3d92f · 7 configs + runtime/graph_config.py; role prompts written early for rule 7; s3_whiteboard is a placeholder (ISSUE-006)
 - 2026-10-05 · P3.2 · af53cfa · mediation/router.py; message actor is agent:<sender>, rejects are actor router; drop_message overrides reject with reason dropped
 - 2026-10-05 · P3.3 · f01092e · runtime/context_builder.py + agent_runner.py (+ prompts.py, environment/materializer.py, tasks.py, tests/fixtures/env/t_test)
+- 2026-10-05 · P3.4 · 60becea · runtime/langgraph_app.py; LangGraph 1.2.13 names match plan; runtime objects in RunContext, plain snapshot in state
 
 ---
 
