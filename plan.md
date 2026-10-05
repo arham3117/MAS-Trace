@@ -758,7 +758,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P5.2 Injector.** (6bbbbcf)
   - **Do:** Write `mastrace/control/injector.py`, following §7.9. The default target is agent `A` and the first source URL of the task. In `s1_fanin`, the target is `A` while `B` reads only clean pages.
   - **Acceptance:** the poisoned page contains the payload, and a GT row is written. The run's `events.sqlite` contains no GT fields (test by scanning for the attack ID string and the attacker email).
-- [ ] **P5.3 GT resolver.**
+- [x] **P5.3 GT resolver.** (c7f79b9)
   - **Do:** Write `mastrace/groundtruth/resolver.py`, following §7.9: `entry_event`, `entry_turn`, `true_paths`, `attack_succeeded`.
   - **Acceptance:** on a `scripted_gullible` `s1_chain` `g1s0` run, `entry_turn == "A#1"`, `true_paths == [["A","B","C","D","E"]]` and `attack_succeeded is True`. With `scripted_resistant`, `attack_succeeded is False`.
 - [ ] **P5.4 Import boundary.**
@@ -1021,6 +1021,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P4.5 · ef65231 · clean baseline: scripted 100%, dev_open 73% after 2 prompt iterations (ISSUE-009); dev model switched to installed qwen2.5:14b with num_ctx 16384
 - 2026-10-05 · P5.1 · cc8770d · attacks/ g1s0 g1s1 g2s0 g2s1 enabled; g1s2 g1s3 g2s2 g2s3 drafts gated to phase 13 (control/attacks.py)
 - 2026-10-05 · P5.2 · 6bbbbcf · control/injector.py + groundtruth/store.py; controller wires attacks; GT-free log test per ISSUE-007
+- 2026-10-05 · P5.3 · c7f79b9 · groundtruth/resolver.py (uses provenance/event_graph.py, P6.1); entry A#1, true path A..E on scripted g1s0
 
 ---
 
