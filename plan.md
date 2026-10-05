@@ -687,7 +687,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 3: Mediation, part 2, and the runtime
 
-- [ ] **P3.1 Graph configs.**
+- [x] **P3.1 Graph configs.** (5a3d92f)
   - **Do:** Write `mastrace/runtime/graph_config.py` (load and validate) and all 7 YAML files listed in §6, with roles and tools per §7.8.
     - `s1_fanin`: entries `A` and `B` (`researcher`, `researcher_2`), then C analyst, D writer, E operator.
     - `s1_fanout`: A researcher, B and C analysts, D writer, E operator. D is a dead end: its turn ends with no outgoing messages, and its text stays in its `model_call` payload only. Only E (the sink) sends email and sets `final_output`.
@@ -1009,6 +1009,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P2.2 · 0d1ae1b · mediation/model_gateway.py + cache.py + budget.py; cache key uses provider identity; call() takes the turn buffer and returns the event ref
 - 2026-10-05 · P2.3 · 4fbea65 · tool_gateway.py + tools/ (web_fetch, read_file, send_email, memory_*); read tools cached, action tools always run
 - 2026-10-05 · P2.4 · 64c07a8 · mediation/memory.py: per-agent + shared/ namespace, versioned; events via tool gateway; Phase 2 complete
+- 2026-10-05 · P3.1 · 5a3d92f · 7 configs + runtime/graph_config.py; role prompts written early for rule 7; s3_whiteboard is a placeholder (ISSUE-006)
 
 ---
 
