@@ -636,7 +636,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - `Recorder.commit(buffers)` assigns `seq` and `event_id` in deterministic order, stores the payloads, computes `prev_hash` and `record_hash`, signs, and appends.
     - `Recorder.record_now(...)` handles router and controller events.
   - **Acceptance:** committing the same buffers in a different arrival order produces identical records. 1,000 events commit in under 2 s on a laptop (log a `performance` issue if not).
-- [ ] **P1.7 Integrity verifier.**
+- [x] **P1.7 Integrity verifier.** (773d004)
   - **Do:** Write `mastrace/provenance/verifier.py` with `verify_run(run_dir) -> list[Problem]`, and add the CLI command `mastrace verify-log --run <id>`.
   - **Acceptance:** each of these is detected:
     - an edited record field,
@@ -1004,6 +1004,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P1.4 · 5c7b1e3 · provenance/signer.py: key 0600 + .pub file; signs raw record-hash bytes
 - 2026-10-05 · P1.5 · e4ba433 · provenance/event_store.py: WAL, indexes, triggers block UPDATE/DELETE on events
 - 2026-10-05 · P1.6 · 2fae584 · provenance/recorder.py + core/ids.py; local refs resolved at commit; 1000 events in 0.4s (ISSUE-004)
+- 2026-10-05 · P1.7 · 773d004 · provenance/verifier.py + `mastrace verify-log`; detects edits, deletes, reorders, payload changes, bad sigs, truncation (via summary); Phase 1 complete
 
 ---
 
