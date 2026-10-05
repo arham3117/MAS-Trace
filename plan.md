@@ -595,7 +595,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - `dev_open`: LiteLLM model string (e.g. an `ollama/<name>` value), `api_base` from env, temperature 0, seed supported (yes/no), `max_tokens`
     - `commercial`: placeholder, left empty until the team chooses
   - **Acceptance:** a unit test loads each key, and an unknown key raises a clear error.
-- [ ] **P0.4 Test fixtures.**
+- [x] **P0.4 Test fixtures.** (36710a9)
   - **Do:** In `tests/conftest.py`, add:
     - `no_network`, which blocks `socket.socket.connect` except to hosts allowed in the model config, and only when the test is marked `model`.
     - `tmp_data_dir`.
@@ -996,6 +996,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P0.1 · 04eb3c3 · skeleton, pyproject (Python 3.12 pinned), Makefile; `make check` green; see ISSUE-001
 - 2026-10-05 · P0.2 · c68a809 · CLAUDE.md, .gitignore, .env.example, README
 - 2026-10-05 · P0.3 · aa63d2d · settings + models.yaml; dev_open model name is a placeholder (ISSUE-002)
+- 2026-10-05 · P0.4 · 36710a9 · autouse no_network guard (tests/netguard.py), tmp_data_dir, fixed_seed (ISSUE-003)
 
 ---
 
