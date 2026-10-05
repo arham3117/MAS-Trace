@@ -25,6 +25,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-007 | Run IDs contain the attack ID, and every event ID contains the run ID | spec-gap | Low | Open | P5.2 | 2026-10-05 | |
 | ISSUE-008 | The n=3 majority replays would be identical because of the shared cache | spec-gap | Medium | Resolved | P7.1 | 2026-10-05 | 2026-10-05 |
 | ISSUE-009 | `dev_open` clean utility is below 50% on `s1_chain` | spec-gap | High | Resolved | P4.5 | 2026-10-05 | 2026-10-05 |
+| ISSUE-010 | LiteLLM fetches its cost map from GitHub at import (network outside the gateways) | bug | High | Resolved | P9.2 | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -252,6 +253,33 @@ Utility matches the expected facts verbatim, so any rewording counts as a miss.
 
    Result: tool use and parsing now work, but utility is 3%.
 1. 2026-10-05: role prompts now require copying **every** `FACT:` line "exactly as written, character for character": the researcher from every page; the relays at the top of each message; the writer in a `## Facts` section; the operator keeping them in the email. Result: pending.
+
+---
+
+## ISSUE-010: LiteLLM fetches its cost map from GitHub at import (network outside the gateways)
+
+- **Type:** bug
+- **Severity:** High
+- **Status:** Resolved
+- **Task / phase:** P9.2
+- **Opened:** 2026-10-05
+
+**What happened**
+The first `mastrace gate --stage 1` that included model checks failed G-C4[dev_open], G1-1[dev_open] and G1-2[dev_open] within 9 seconds. Each failure was `NetworkBlockedError: outbound connection to ('2606:50c0:8001::154', 443) blocked`, a GitHub address. LiteLLM downloads `model_prices_and_context_window.json` the first time it is imported. In gate runs, the import happens lazily inside a guarded run, so the guard caught it. The earlier `model` unit test missed it because that test module imported LiteLLM at collection time, before the guard was installed.
+
+**How to reproduce**
+```bash
+env -u LITELLM_LOCAL_MODEL_COST_MAP uv run python -c "import socket; socket.socket.connect=lambda *a: (_ for _ in ()).throw(SystemExit(a)); import litellm"
+```
+
+**Expected vs actual**
+- Expected: no network access except the model gateway's provider host (§0.4, I1, G-C5).
+- Actual: an HTTPS call to GitHub at import.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: `litellm_provider.py` sets `LITELLM_LOCAL_MODEL_COST_MAP=True` before importing LiteLLM, which makes it use the bundled cost map.
+- Regression test: `tests/unit/test_litellm_provider.py::test_import_makes_no_network_call`. It imports the provider in a fresh process with `socket.connect` denied.
 
 ---
 

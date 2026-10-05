@@ -2,6 +2,12 @@
 
 from __future__ import annotations
 
+import os
+
+# LiteLLM otherwise downloads its model cost map from GitHub at import time (ISSUE-010):
+# a network call outside the gateways, caught by the no_network guard.
+os.environ.setdefault("LITELLM_LOCAL_MODEL_COST_MAP", "True")
+
 import time
 from collections.abc import Callable
 from typing import Any

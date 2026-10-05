@@ -813,7 +813,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 9: Stage 1 gate (one-way links)
 
-- [ ] **P9.1 Plumbing gate.**
+- [x] **P9.1 Plumbing gate.** (456c9c8)
   - **Do:** Run `mastrace gate --stage 1` with the scripted provider. Fix failures, logging each one as a `gate-failure` issue and resolving it with a regression test.
   - **Acceptance:** all common checks and the Stage 1 plumbing checks pass 5 of 5.
 - [ ] **P9.2 Model gate.**
@@ -1032,6 +1032,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P8.1 · 316d1ea · evaluation/scorer.py -> reports/results/raw/scores.csv
 - 2026-10-05 · P8.2 · 5b6f33e · tests/gates harness + common/stage1-3; all scripted checks pass for stages 1-3
 - 2026-10-05 · P8.3 · 33013c6 · control/gates.py; `mastrace gate --stage N [--plumbing-only]`, `stage-status`, make gate
+- 2026-10-05 · P9.1 · 456c9c8 · stage 1 plumbing gate PASS (all common + G1-x scripted 5/5) at 9c4a657: reports/gates/stage1_2026-10-05_plumbing.md; no gate-failure issues
 
 ---
 

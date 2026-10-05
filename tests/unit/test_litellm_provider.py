@@ -123,3 +123,23 @@ def test_dev_model_live() -> None:
         )
     )
     assert resp.text.strip()
+
+
+def test_import_makes_no_network_call() -> None:
+    """ISSUE-010: importing the provider (and litellm) in a fresh process opens no socket."""
+    import subprocess
+    import sys
+
+    code = (
+        "import socket\n"
+        "def deny(*a, **k):\n"
+        "    raise SystemExit('network call during import: %r' % (a[1:],))\n"
+        "socket.socket.connect = deny\n"
+        "socket.socket.connect_ex = deny\n"
+        "import mastrace.mediation.providers.litellm_provider\n"
+        "print('ok')\n"
+    )
+    env = {k: v for k, v in __import__("os").environ.items() if k != "LITELLM_LOCAL_MODEL_COST_MAP"}
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, env=env)
+    assert out.returncode == 0, out.stdout + out.stderr
+    assert out.stdout.strip() == "ok"
