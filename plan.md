@@ -619,7 +619,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 - [x] **P1.2 Canonical JSON and hashing.** (f899cf5)
   - **Do:** Write `mastrace/core/canonical.py`: `canonical_json`, `sha256_hex`, `request_hash_model` and `request_hash_tool`, as specified in §7.7.
   - **Acceptance:** the hashes are stable across dict insertion orders, and unicode text is preserved.
-- [ ] **P1.3 PayloadStore.**
+- [x] **P1.3 PayloadStore.** (ae39330)
   - **Do:** Write `mastrace/provenance/payload_store.py` with `put(text) -> "sha256:<hex>"`, `get(ref) -> str` and `verify(ref) -> bool`, stored under `payloads/<aa>/<hex>`. Writes are atomic: write to a temp file, then rename. Storing the same text twice creates one file.
   - **Acceptance:** tests for storing the same text twice, a corrupted file being detected, and a missing ref raising `PayloadMissing`.
 - [ ] **P1.4 Signer.**
@@ -1000,6 +1000,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P0.5 · 73baed6 · core/logging.py (logs/mastrace.log + console), code_version() with -dirty; Phase 0 complete
 - 2026-10-05 · P1.1 · bc32117 · core/schemas.py; GraphConfig rules 1-6 as validators, 7-8 as check_resources/check_scripted_feedback
 - 2026-10-05 · P1.2 · f899cf5 · core/canonical.py: canonical_json, sha256_hex, request_hash_model/tool
+- 2026-10-05 · P1.3 · ae39330 · provenance/payload_store.py: atomic, idempotent put; verify; PayloadMissing
 
 ---
 
