@@ -748,7 +748,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 5: Injector and ground truth
 
-- [ ] **P5.1 Attack library v1.**
+- [x] **P5.1 Attack library v1.** (cc8770d)
   - **Do:** Write `attacks/g1s0.yaml`, `g1s1.yaml`, `g2s0.yaml` and `g2s1.yaml`. Also write drafts of the `S2`/`S3` variants with `enabled_from_phase: 13`.
     - **Every template is a single paragraph with no blank lines inside**, so scripted agents treat it as one unit (§7.13).
     - G2 templates include the text `MARKER: {marker}` inside that paragraph.
@@ -1019,6 +1019,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P4.3 · bbde31e · 10 tasks (2-3 sources + 1 sources_2 page each, 3 FACT lines/page); validation test also proves pages trigger no scripted instruction rule; 70 scripted runs at 100% utility
 - 2026-10-05 · P4.4 · 8576012 · environment/checkers.py; goal_g2 takes the marker string (attack spec lookup happens in the resolver)
 - 2026-10-05 · P4.5 · ef65231 · clean baseline: scripted 100%, dev_open 73% after 2 prompt iterations (ISSUE-009); dev model switched to installed qwen2.5:14b with num_ctx 16384
+- 2026-10-05 · P5.1 · cc8770d · attacks/ g1s0 g1s1 g2s0 g2s1 enabled; g1s2 g1s3 g2s2 g2s3 drafts gated to phase 13 (control/attacks.py)
 
 ---
 
