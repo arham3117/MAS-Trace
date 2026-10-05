@@ -602,7 +602,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - `fixed_seed`.
   - **Do:** Register the pytest markers.
   - **Acceptance:** a test shows that an outbound connection raises inside `no_network`.
-- [ ] **P0.5 Logging and code version.**
+- [x] **P0.5 Logging and code version.** (73baed6)
   - **Do:** Write `mastrace/core/logging.py` (Python logging to `logs/mastrace.log` and the console) and `code_version()` (git short hash, plus `-dirty` if there are uncommitted changes).
   - **Acceptance:** unit tests, including the `-dirty` detection, using a temporary git repo.
 
@@ -997,6 +997,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P0.2 · c68a809 · CLAUDE.md, .gitignore, .env.example, README
 - 2026-10-05 · P0.3 · aa63d2d · settings + models.yaml; dev_open model name is a placeholder (ISSUE-002)
 - 2026-10-05 · P0.4 · 36710a9 · autouse no_network guard (tests/netguard.py), tmp_data_dir, fixed_seed (ISSUE-003)
+- 2026-10-05 · P0.5 · 73baed6 · core/logging.py (logs/mastrace.log + console), code_version() with -dirty; Phase 0 complete
 
 ---
 
