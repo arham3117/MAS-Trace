@@ -1,0 +1,7 @@
+# Live detectors (plan.md §7.10). D4 patterns are ranking features, not proof.
+canary_pattern: "CANARY-[0-9a-f]{8}"
+injection_patterns:
+  - "ignore (all|previous) instructions"
+  - "note to the (operator|team member)"
+  - "send (a )?copy to"
+# D4 also fires on any email address in a fetched page that is not an allowed recipient.
