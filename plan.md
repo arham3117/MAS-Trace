@@ -856,7 +856,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - The tracer uses this ranking to order replays. A verdict is still only `confirmed` by replay.
     - Record `investigator_fooled = (top pick not confirmed)`.
   - **Acceptance:** the boundary test still passes (I2). An integration test runs with the scripted provider. The new method name is `tracer_v1+investigator`.
-- [ ] **P12.2 Respond (quarantine and heal).**
+- [x] **P12.2 Respond (quarantine and heal).** (6e19f28)
   - **Do:** Write `mastrace/analysis/respond.py`.
     - Given a confirmed verdict, it asks the **router** to quarantine the entry agent for a healing replay. The router records a `quarantine` event, stops the agent's outgoing messages for the poisoned turn, and revokes its tools for that turn.
     - It runs a healing replay with the confirmed entry neutralized.
@@ -1051,6 +1051,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · ISSUE-025 · 21f27b8 · three path labels; carried vs sufficient 100%; tracer marks necessary/redundant; consequence rule general (ISSUE-024)
 - 2026-10-05 · D3 follow-up · c46eff3 · whiteboard explanation; scripted checks C resistant; additional symptom events
 - 2026-10-05 · P12.1 · 86cde2e · investigator (scripted): method tracer_v1+investigator, fooled flag, separate signed analysis log; boundary tests pass
+- 2026-10-05 · P12.2 · 6e19f28 · respond.py: containment replay (router quarantines entry turn) + healing replay; all 7 configs (stages 1-3) contained, recovered, utility_after >= 2/3 (ISSUE-026)
 
 ---
 
