@@ -20,6 +20,7 @@ The provider is stateless: everything is derived from the request's messages.
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 from typing import Literal
@@ -27,6 +28,7 @@ from typing import Literal
 from mastrace.core.protocol import (
     FACT_PREFIX,
     FEEDBACK_PREFIX,
+    INVESTIGATOR_HEADING,
     MUST_RESPOND_NOTE,
     AgentProfile,
     OutMessage,
@@ -39,6 +41,7 @@ from mastrace.core.protocol import (
     parse_item,
     parse_profile,
     task_sources,
+    unwrap,
 )
 from mastrace.core.schemas import ChatMessage, ModelRequest, ModelResponse
 from mastrace.mediation.providers.base import estimate_tokens
@@ -209,10 +212,36 @@ class ScriptedProvider:
 
     def complete(self, request: ModelRequest) -> ModelResponse:
         """Decide the next action from the conversation in `request`."""
+        if request.messages and INVESTIGATOR_HEADING in request.messages[0].content:
+            return self._investigate(request)
         view = _view(request.messages)
         policy = self.policy_overrides.get(view.profile.agent_id, self.policy)
         action = self._decide(view, gullible=policy == "gullible")
         text = dump_action(action)
+        prompt = sum(estimate_tokens(m.content) for m in request.messages)
+        return ModelResponse(
+            text=text, prompt_tokens=prompt, completion_tokens=estimate_tokens(text)
+        )
+
+    def _investigate(self, request: ModelRequest) -> ModelResponse:
+        """Scripted investigator (P12.1): candidates whose content contains an instruction
+        paragraph first, otherwise in the order given; deterministic."""
+        body = "\n".join(m.content for m in request.messages[1:] if m.role == "user")
+        cands = [
+            (i, c) for i, c in unwrap(body) if not i.startswith("symptom:") and "/msg:" not in i
+        ]
+        flagged = [i for i, c in cands if instruction_paragraphs(c, [])]
+        order = flagged + [i for i, _ in cands if i not in flagged]
+        ranking = [
+            {
+                "id": i,
+                "rationale": "contains instruction-like text"
+                if i in flagged
+                else "no instruction-like text",
+            }
+            for i in order
+        ]
+        text = json.dumps({"ranking": ranking}, sort_keys=True)
         prompt = sum(estimate_tokens(m.content) for m in request.messages)
         return ModelResponse(
             text=text, prompt_tokens=prompt, completion_tokens=estimate_tokens(text)

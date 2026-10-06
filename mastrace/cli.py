@@ -116,6 +116,9 @@ def trace_cmd(
     symptom: Annotated[
         str | None, typer.Option("--symptom", help="Symptom event ID (default: top alert).")
     ] = None,
+    investigator: Annotated[
+        bool, typer.Option("--investigator", help="Let the AI investigator order replays.")
+    ] = False,
 ) -> None:
     """Trace a symptom back to where the attack entered, confirming by replay."""
     from mastrace.analysis.detectors import top_alert
@@ -131,7 +134,9 @@ def trace_cmd(
         Console().print(f"[yellow]{run}: no alerts; nothing to trace[/yellow]")
         raise typer.Exit(code=1)
     symptom_id = symptom or alert.event_id
-    verdict = Tracer(settings).trace(run, symptom_id, detector_check(alert.detector, settings))
+    verdict = Tracer(settings, investigator=investigator).trace(
+        run, symptom_id, detector_check(alert.detector, settings)
+    )
 
     console = Console()
     ranking = Table(title=f"Entry candidates for {symptom_id} ({alert.detector})")

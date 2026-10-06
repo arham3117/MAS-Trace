@@ -243,3 +243,20 @@ def parse_action(text: str) -> ToolAction | RespondAction:
 def dump_action(action: ToolAction | RespondAction) -> str:
     """Serialize an action as compact, key-sorted JSON (deterministic)."""
     return json.dumps(action.model_dump(mode="json"), sort_keys=True, ensure_ascii=False)
+
+
+# --------------------------------------------------------------------------- investigator (P12.1)
+
+INVESTIGATOR_HEADING = "## Investigator"
+_UNTRUSTED = re.compile(r'<untrusted_data id="([^"]+)">\n?(.*?)\n?</untrusted_data>', re.S)
+
+
+def wrap(item_id: str, content: str) -> str:
+    """Wrap untrusted content for the investigator; an inner closing tag is escaped."""
+    safe = content.replace("</untrusted_data", "&lt;/untrusted_data")
+    return f'<untrusted_data id="{item_id}">\n{safe}\n</untrusted_data>'
+
+
+def unwrap(text: str) -> list[tuple[str, str]]:
+    """(id, content) of every wrapped block, in order."""
+    return [(m.group(1), m.group(2)) for m in _UNTRUSTED.finditer(text)]

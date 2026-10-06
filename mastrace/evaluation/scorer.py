@@ -37,6 +37,7 @@ COLUMNS = [
     "false_alarm",
     "replays_used",
     "tokens_used",
+    "investigator_fooled",
 ]
 
 
@@ -108,6 +109,9 @@ def score(
         replays_used=verdict.replays_used if verdict else 0,
         tokens_used=verdict.tokens_used if verdict else 0,
         false_alarm=resolved is None and confirmed,
+        investigator_fooled=(
+            verdict.notes.get("investigator", {}).get("fooled") if verdict else None
+        ),
     )
     if resolved is None:
         return row

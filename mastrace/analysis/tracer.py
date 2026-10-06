@@ -98,9 +98,17 @@ def select_entries(graph: EventGraph, confirmed: Sequence[str]) -> list[str]:
 class Tracer:
     """Plain-code tracer. Reads the run log; never reads ground truth (I8)."""
 
-    def __init__(self, settings: Settings | None = None, config: TracerConfig | None = None):
+    def __init__(
+        self,
+        settings: Settings | None = None,
+        config: TracerConfig | None = None,
+        investigator: bool = False,
+    ):
+        """`investigator=True` lets the AI investigator order the replays (P12.1)."""
         self.settings = settings or get_settings()
         self.cfg = config or TracerConfig.load()
+        self.investigator = investigator
+        self.method = "tracer_v1+investigator" if investigator else "tracer_v1"
 
     def trace(self, run_id: str, symptom_event_id: str, symptom_check: SymptomCheck) -> Verdict:
         """Diagnose one symptom and store the verdict in the run's `verdicts` table."""
@@ -121,7 +129,23 @@ class Tracer:
 
         replays: list[dict[str, Any]] = []
         confirmed: list[str] = []
-        top = [graph.events[c["candidate"]] for c in ranking[: self.cfg.top_k]]
+        order = [r["candidate"] for r in ranking]
+        inv = None
+        if self.investigator and order:
+            from mastrace.analysis.investigator import Investigator
+
+            pool = order[: 2 * self.cfg.top_k]
+            inv = Investigator(self.settings).rank(
+                run_dir,
+                graph,
+                symptom_event_id,
+                pool,
+                manifest.model_key,
+                manifest.seed,
+                manifest.run_uid,
+            )
+            order = inv.order + [c for c in order if c not in inv.order]
+        top = [graph.events[c] for c in order[: self.cfg.top_k]]
         for e in top:
             override = self._neutralize(e)
             ids, present = self._replay(run_id, [override], n, symptom_check)
@@ -171,11 +195,11 @@ class Tracer:
 
         with EventStore.for_run(run_dir, readonly=True) as store:
             k = len(store.verdicts()) + 1
-        verdict_id = f"{run_id}:tracer_v1:{symptom_event_id}:{k}"
+        verdict_id = f"{run_id}:{self.method}:{symptom_event_id}:{k}"
         base: dict[str, Any] = {
             "verdict_id": verdict_id,
             "run_id": run_id,
-            "method": "tracer_v1",
+            "method": self.method,
             "symptom_event_id": symptom_event_id,
             "ranking": ranking,
             "confirmed_entry_events": confirmed,
@@ -200,6 +224,17 @@ class Tracer:
             )
         v.replays_used = sum(len(r["replay_run_ids"]) for r in v.replays)
         v.tokens_used = sum(self._tokens(rid) for r in v.replays for rid in r["replay_run_ids"])
+        if inv is not None:
+            top_pick = inv.order[0] if inv.order else None
+            v.notes["investigator"] = {
+                "order": inv.order,
+                "rationales": inv.rationales,
+                "valid_output": inv.valid,
+                "top_pick": top_pick,
+                "fooled": top_pick not in v.confirmed_entry_events,
+                "tokens": inv.tokens,
+            }
+            v.tokens_used += inv.tokens
         with EventStore.for_run(run_dir) as store:
             store.add_verdict(v)
         return v

@@ -187,6 +187,7 @@ class Verdict(_Model):
     replays: list[dict[str, Any]] = Field(default_factory=list)
     tokens_used: int = 0
     replays_used: int = 0
+    notes: dict[str, Any] = Field(default_factory=dict)  # e.g. investigator ranking (P12.1)
 
 
 # --------------------------------------------------------------------------- graph config (§7.1)
