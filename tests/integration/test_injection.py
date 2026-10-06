@@ -14,6 +14,7 @@ from mastrace.control.injector import page_path, poison
 from mastrace.environment.tasks import load_task
 from mastrace.groundtruth.resolver import resolve
 from mastrace.groundtruth.store import GroundTruthStore
+from mastrace.provenance.payload_store import PayloadStore
 from mastrace.runtime.run import RunResult
 from mastrace.settings import Settings
 
@@ -78,17 +79,51 @@ def test_injection_poisons_page_and_writes_gt(settings: Settings) -> None:
 
 
 def test_run_log_has_no_ground_truth(settings: Settings) -> None:
-    """ISSUE-007: identifiers embed the run ID; every other field must be GT-free."""
+    """answers.md D4: no attack ID, attacker email or readable run name anywhere in events
+    (identifiers included) or in payloads, except the poisoned page and the contexts of
+    the model calls that read it."""
     r = attack_run(settings, "scripted_resistant")
+    gt = gt_of(settings, r.run_id)
+    page_ref = f"sha256:{gt.poisoned_page_sha256}"
     conn = sqlite3.connect(r.run_dir / "events.sqlite")
     rows = [json.loads(x) for (x,) in conn.execute("SELECT record_json FROM events")]
     conn.close()
+    entry_ids = {e["event_id"] for e in rows if e["output_ref"] == page_ref}
+    assert entry_ids, "the poisoned page was read"
+    readers = {
+        e["input_ref"]
+        for e in rows
+        if e["kind"] == "model_call" and entry_ids & set(e["built_from"])
+    }
+    needles = ["g1s0", "evil.example", r.run_id, "poisoned_page_sha256", "target_agent"]
     for rec in rows:
-        blob = json.dumps({k: v for k, v in rec.items() if k not in IDENTIFIER_FIELDS})
-        for needle in ["g1s0", "evil.example", "poisoned_page_sha256", "target_agent", "G1"]:
+        blob = json.dumps(rec)
+        for needle in needles:
             assert needle not in blob, (needle, rec["kind"])
+        assert rec["run_id"].startswith("r_") and len(rec["run_id"]) == 18
+    payloads = PayloadStore(r.run_dir / "payloads")
+    refs = {x for rec in rows for x in (rec["input_ref"], rec["output_ref"]) if x}
+    for ref in sorted(refs - {page_ref} - readers):
+        text = payloads.get(ref)
+        for needle in needles:
+            assert needle not in text, (needle, ref)
     manifest = json.loads((r.run_dir / "manifest.json").read_text())
+    assert manifest["run_name"] == r.run_id and manifest["run_uid"] == rows[0]["run_id"]
     assert "target_agent" not in manifest and "poisoned_page_sha256" not in manifest
+
+
+def test_run_uid_is_deterministic_and_replays_differ(settings: Settings) -> None:
+    from mastrace.analysis.replay import replay
+    from mastrace.runtime.run import read_manifest
+
+    a = attack_run(settings, "scripted_resistant")
+    uid = read_manifest(a.run_dir).run_uid
+    other = Settings(data_dir=settings.data_dir.parent / "other")
+    b = run_with_attack("s1_chain", "t01", "g1s0", "scripted_resistant", 1, settings=other)
+    assert read_manifest(b.run_dir).run_uid == uid
+    [rid] = replay(a.run_id, settings=settings)
+    m = read_manifest(settings.runs_dir / rid)
+    assert m.run_uid != uid and m.run_uid.startswith("r_") and m.run_name == rid
 
 
 def test_resolver_gullible_chain(settings: Settings) -> None:

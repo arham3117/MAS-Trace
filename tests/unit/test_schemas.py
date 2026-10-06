@@ -316,7 +316,8 @@ EVENT = EventRecord(
 ROUND_TRIP: list[BaseModel] = [
     EVENT,
     RunManifest(
-        run_id="r",
+        run_name="s1_chain-t01-clean-scripted_gullible-s1",
+        run_uid="r_0123456789abcdef",
         config_name="s1_chain",
         config_hash="h",
         config=CHAIN,

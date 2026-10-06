@@ -12,6 +12,7 @@ import re
 from collections.abc import Sequence
 from typing import cast
 
+from mastrace.core.ids import replay_uid
 from mastrace.core.schemas import GraphConfig, Override
 from mastrace.mediation.providers.scripted import Policy
 from mastrace.runtime.run import read_manifest, run_once
@@ -46,7 +47,8 @@ def replay(
     cfg = GraphConfig.model_validate(m.config)
     out = []
     for _ in range(n):
-        rid = f"{run_id}__r{_next_index(settings, run_id)}"
+        k = _next_index(settings, run_id)
+        rid = f"{run_id}__r{k}"
         run_once(
             cfg,
             m.task_id,
@@ -62,6 +64,9 @@ def replay(
             feedback_rounds=m.feedback_rounds,
             replay_of=run_id,
             replay_salt=rid,
+            run_uid=replay_uid(m.run_uid, k),
+            handoff_style=m.handoff_style,
+            page_render=m.page_render,
         )
         out.append(rid)
     return out

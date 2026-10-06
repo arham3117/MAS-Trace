@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import re
 
+from mastrace.core.canonical import canonical_json, sha256_hex
+
 _TURN = re.compile(r"([A-Za-z0-9_]+)#([0-9]+)")
 
 
@@ -28,3 +30,30 @@ def parse_turn_id(tid: str) -> tuple[str, int]:
 def agent_actor(agent_id: str) -> str:
     """Actor string for an agent: `agent:<id>`."""
     return f"agent:{agent_id}"
+
+
+def run_uid(
+    config_hash: str,
+    task_id: str,
+    attack_id: str | None,
+    model_key: str,
+    seed: int,
+    handoff_style: str,
+    page_render: str,
+) -> str:
+    """Opaque run identifier used inside events (answers.md D4): `r_` + 16 hex chars."""
+    t = {
+        "config": config_hash,
+        "task": task_id,
+        "attack": attack_id or "clean",
+        "model": model_key,
+        "seed": seed,
+        "handoff_style": handoff_style,
+        "page_render": page_render,
+    }
+    return "r_" + sha256_hex(canonical_json(t))[:16]
+
+
+def replay_uid(original_uid: str, k: int) -> str:
+    """Opaque identifier of the k-th replay of a run."""
+    return "r_" + sha256_hex(f"{original_uid}:r{k}")[:16]

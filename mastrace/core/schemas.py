@@ -108,10 +108,18 @@ Override = Annotated[
 # --------------------------------------------------------------------------- run records
 
 
-class RunManifest(_Model):
-    """Contents of `data/runs/<run_id>/manifest.json` (§7.5)."""
+HandoffStyle = Literal["summary", "fact_only", "full_context"]
+PageRender = Literal["fact_prefixed", "plain"]
 
-    run_id: str
+
+class RunManifest(_Model):
+    """Contents of `data/runs/<run_name>/manifest.json` (§7.5, amended by answers.md D4).
+
+    `run_name` is the readable directory name; `run_uid` is the opaque ID used in events.
+    """
+
+    run_name: str
+    run_uid: str
     config_name: str
     config_hash: str
     config: dict[str, Any]
@@ -126,6 +134,9 @@ class RunManifest(_Model):
     status: str = "created"
     env_snapshot_hash: str | None = None
     replay_of: str | None = None
+    handoff_style: HandoffStyle = "summary"
+    page_render: PageRender = "fact_prefixed"
+    model_digest: str | None = None
     policy_overrides: dict[str, str] = Field(default_factory=dict)  # scripted provider only
     feedback_rounds: int = 1  # scripted provider only
 

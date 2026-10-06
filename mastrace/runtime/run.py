@@ -10,13 +10,16 @@ from typing import Any
 
 from mastrace.analysis.detectors import Detectors
 from mastrace.core.errors import RunExists
+from mastrace.core.ids import run_uid as make_run_uid
 from mastrace.core.logging import code_version, get_logger
 from mastrace.core.protocol import render_task
 from mastrace.core.schemas import (
     EventKind,
     EventRecord,
     GraphConfig,
+    HandoffStyle,
     Override,
+    PageRender,
     RunManifest,
     TaskSpec,
 )
@@ -51,7 +54,7 @@ MANIFEST = "manifest.json"
 class RunResult:
     """Outcome of one run."""
 
-    run_id: str
+    run_id: str  # readable run name (the directory name)
     run_dir: Path
     status: str
     final_output: str | None
@@ -66,6 +69,11 @@ def make_run_id(
 ) -> str:
     """`<config>-<task>-<attack|clean>-<model>-s<seed>` (§7.5)."""
     return f"{config_name}-{task_id}-{attack_id or 'clean'}-{model_key}-s{seed}"
+
+
+def default_page_render(provider: str) -> PageRender:
+    """Scripted models need `FACT:` prefixes; real models read plain pages (answers.md D1a)."""
+    return "fact_prefixed" if provider == "scripted" else "plain"
 
 
 def task_sources_for(cfg: GraphConfig, agent_id: str, task: TaskSpec) -> list[str]:
@@ -92,6 +100,9 @@ def run_once(
     overwrite: bool = False,
     replay_of: str | None = None,
     replay_salt: str | None = None,
+    run_uid: str | None = None,
+    handoff_style: HandoffStyle = "summary",
+    page_render: PageRender | None = None,
 ) -> RunResult:
     """Run one configuration end to end and verify its log.
 
@@ -105,7 +116,13 @@ def run_once(
     if model_cfg.provider == "scripted":
         cfg.check_scripted_feedback(feedback_rounds)
     task = load_task(task_id, settings.templates_dir)
+    if page_render is None:
+        page_render = default_page_render(model_cfg.provider)
     run_id = run_id or make_run_id(cfg.name, task_id, attack_id, model_key, seed)
+    cfg_hash = config_hash(cfg)
+    run_uid = run_uid or make_run_uid(
+        cfg_hash, task_id, attack_id, model_key, seed, handoff_style, page_render
+    )
     run_dir = settings.runs_dir / run_id
     if run_dir.exists():
         if not overwrite:
@@ -126,10 +143,12 @@ def run_once(
             inject(env_dir, task, run_id)
         snapshot = env_snapshot_hash(env_dir)
 
-    cfg_hash = config_hash(cfg)
     version = code_version()
     manifest = RunManifest(
-        run_id=run_id,
+        run_name=run_id,
+        run_uid=run_uid,
+        handoff_style=handoff_style,
+        page_render=page_render,
         config_name=cfg.name,
         config_hash=cfg_hash,
         config=cfg.model_dump(mode="json"),
@@ -153,7 +172,7 @@ def run_once(
     assert settings.keys_dir is not None and settings.cache_path is not None
     store = EventStore.for_run(run_dir)
     recorder = Recorder(
-        run_id,
+        run_uid,
         cfg.stage,
         store,
         PayloadStore(run_dir / "payloads"),
