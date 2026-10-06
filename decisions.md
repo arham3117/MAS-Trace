@@ -1,5 +1,7 @@
 # Decisions needed from the team
 
+> **Answered 2026-10-05 in `answers.md`.** Each answer is logged as a `decision` issue (ISSUE-015 to ISSUE-022).
+
 These are open questions I cannot settle on my own. Each one is either a choice the plan leaves to the
 team (plan.md §0.3 rule 9, CLAUDE.md "Ask the human before …"), or information only the team has.
 
@@ -44,7 +46,7 @@ attacker's paragraph never reaches E, the agent that can send email.
 models the realistic weakness (agents relaying content they should not). Option 5 is a good addition later as
 a stealthier variant.
 
-**Your answer:**
+**Your answer:** Option 4 as a neutral handoff, plus per-provider page rendering and normalized utility matching; G2 fallback; no new attack payloads (see answers.md D1).
 
 ---
 
@@ -57,7 +59,7 @@ off agent prompts. All baselines and gate runs so far used this model.
 
 **Options:** (a) keep it; (b) name another model. Changing the model means re-running the P4.5 baseline.
 
-**Your answer:**
+**Your answer:** Keep qwen2.5:14b-instruct-q4_K_M with num_ctx 16384; record the model digest (see answers.md D2).
 
 ---
 
@@ -69,7 +71,7 @@ B = analyst, C = planner, D = writer, E = operator; entry A, sink E).
 
 **What I need:** the links and their types (one-way or two-way), each agent's role, and the entry and sink agents.
 
-**Your answer:**
+**Your answer:** Provisional layout: A→B, A↔C, B↔C, B→D, D→E, C→E (see answers.md D3).
 
 ---
 
@@ -85,7 +87,7 @@ identifier fields**, and analysis code never parses run IDs.
 **Options:** (a) accept this; (b) use opaque, hash-based run IDs inside events, and keep the readable name only for
 the directory and manifest. That is stricter isolation and a small change.
 
-**Your answer:**
+**Your answer:** Option (b): opaque run_uid inside events; the readable run_name is used only for the directory and manifest (see answers.md D4).
 
 ---
 
@@ -98,7 +100,7 @@ Nothing in the plan asks for a defence.
 **Options:** (a) keep the system undefended (my recommendation); (b) add a defence line now; (c) make
 "defended vs undefended" an experimental factor in Phase 13.
 
-**Your answer:**
+**Your answer:** (a) undefended now; (c) a defence factor in Phase 13 (see answers.md D5).
 
 ---
 
@@ -114,7 +116,7 @@ non-causal. This would unfairly lower the tracer's path precision in the results
 2. Replay-based: drop each edge and check whether the symptom survives. This is exact but costs extra runs.
 3. Keep §7.9 as written and report it as a limitation.
 
-**Your answer:**
+**Your answer:** Option 1 using anchors, validated against replay on a sample of 20 runs, agreement ≥ 90% (see answers.md D6).
 
 ---
 
@@ -128,7 +130,7 @@ non-causal. This would unfairly lower the tracer's path precision in the results
 2. Allow me to continue with the plain-code parts of Phases 10–12 (two-way stress, multi-cause tracing,
    the investigator with the scripted provider) and leave every model gate pending.
 
-**Your answer:**
+**Your answer:** Option 2: continue the plain-code parts of P10.1, P10.2, P11.1, P11.2, P12.1 and P12.2 under the stated conditions (see answers.md D7).
 
 ---
 
@@ -139,4 +141,4 @@ spend on commercial APIs without your approval.
 
 **What I need, eventually:** the provider and model, a budget cap, and where the API key will come from (`.env`).
 
-**Your answer:**
+**Your answer:** Deferred until after the pilot; no commercial spending (see answers.md D8).

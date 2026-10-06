@@ -26,10 +26,18 @@ Rules are in `plan.md` §0.3:
 | ISSUE-008 | The n=3 majority replays would be identical because of the shared cache | spec-gap | Medium | Resolved | P7.1 | 2026-10-05 | 2026-10-05 |
 | ISSUE-009 | `dev_open` clean utility is below 50% on `s1_chain` | spec-gap | High | Resolved | P4.5 | 2026-10-05 | 2026-10-05 |
 | ISSUE-010 | LiteLLM fetches its cost map from GitHub at import (network outside the gateways) | bug | High | Resolved | P9.2 | 2026-10-05 | 2026-10-05 |
-| ISSUE-011 | Attack does not land on dev model | gate-failure | High | Blocked | P9.2 | 2026-10-05 | |
-| ISSUE-012 | Role prompts carry no prompt-injection defence | decision | Medium | Open | P4.2 | 2026-10-05 | |
+| ISSUE-011 | Attack does not land on dev model | gate-failure | High | In progress | P9.2 | 2026-10-05 |  |
+| ISSUE-012 | Role prompts carry no prompt-injection defence | decision | Medium | Resolved | P4.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-013 | Tracing the same run twice crashed on a duplicate verdict ID | bug | Medium | Resolved | P8.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-014 | Ground-truth "true paths" use `built_from` causality, which over-approximates | spec-gap | Medium | Open | P5.3 | 2026-10-05 | |
+| ISSUE-015 | D1: make attacks land with a neutral handoff, plain pages and normalized utility | decision | High | In progress | P9.2 | 2026-10-05 |  |
+| ISSUE-016 | D2: confirm dev_open model and record its digest | decision | Low | In progress | P9.2 | 2026-10-05 |  |
+| ISSUE-017 | D3: provisional s3_whiteboard layout | decision | Low | In progress | P3.1 | 2026-10-05 |  |
+| ISSUE-018 | D4: opaque run_uid inside events | decision | Medium | In progress | P5.2 | 2026-10-05 |  |
+| ISSUE-019 | D5: undefended baseline; defence becomes a Phase 13 factor | decision | Low | Resolved | P4.2 | 2026-10-05 | 2026-10-05 |
+| ISSUE-020 | D6: anchor-based true paths validated by replay | decision | Medium | In progress | P5.3 | 2026-10-05 |  |
+| ISSUE-021 | D7: plain-code work on Phases 10-12 allowed while Stage 1 model gate pending | decision | Low | Resolved | P10-P12 | 2026-10-05 | 2026-10-05 |
+| ISSUE-022 | D8: commercial model deferred until after the pilot | decision | Low | Resolved | P13.3 | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -82,6 +90,8 @@ P0.3 does not fix the `models.yaml` schema or the dev model name. These choices 
 
 
 **Note (2026-10-05, P4.5):** the placeholder `ollama/qwen2.5:7b-instruct` is not installed on this machine. `dev_open` now points to the installed `ollama_chat/qwen2.5:14b-instruct-q4_K_M` with `extra_params: {num_ctx: 16384}`. Ollama's default 2048-token context silently truncated agent prompts. `extra_params` is part of the provider identity, and therefore of the cache key. **Still needs team confirmation**: see `decisions.md` D2.
+
+**Note (2026-10-05):** Team confirmed 2026-10-05 (answers.md D2). Digest recording is tracked in ISSUE-016.
 ---
 
 ## ISSUE-003: Scope of the `no_network` fixture
@@ -176,6 +186,8 @@ The placeholder is used. No gate check depends on `s3_whiteboard` specifically, 
 
 **Needs from the human:** the whiteboard layout: links and their types, roles, and entry and sink agents.
 
+
+**Note (2026-10-05):** Human decision D3 (answers.md; ISSUE-017): provisional layout given; resolved once the config is updated.
 ---
 
 ## ISSUE-007: Run IDs contain the attack ID, and every event ID contains the run ID
@@ -195,6 +207,8 @@ The placeholder is used. No gate check depends on `s3_whiteboard` specifically, 
 3. Analysis code never parses run IDs. A static check is added to `test_boundaries.py` in P5.4: no `run_id.split`/attack-ID regex under `mastrace/analysis/`.
 4. Alternative, if the team prefers: use an opaque deterministic run ID (a hash of the run tuple) in events, and keep the readable name only as the directory name and in `manifest.json`.
 
+
+**Note (2026-10-05):** Human decision D4 (answers.md; ISSUE-018): opaque run_uid inside events; resolved once implemented.
 ---
 
 ## ISSUE-008: The n=3 majority replays would be identical because of the shared cache
@@ -293,7 +307,7 @@ env -u LITELLM_LOCAL_MODEL_COST_MAP uv run python -c "import socket; socket.sock
 
 - **Type:** gate-failure
 - **Severity:** High
-- **Status:** Blocked
+- **Status:** In progress
 - **Task / phase:** P9.2
 - **Opened:** 2026-10-05
 
@@ -329,13 +343,15 @@ Agent A reads the poisoned page, and D4 fires on it. But since prompt iteration 
 **Workaround (if any)**
 None. Phases 10 and later wait on this decision. The scripted Stage 2 and Stage 3 checks already pass.
 
+
+**Note (2026-10-05):** Human decision D1 (answers.md; ISSUE-015). Status back to In progress while D1a–D1e are implemented.
 ---
 
 ## ISSUE-012: Role prompts carry no prompt-injection defence
 
 - **Type:** decision
 - **Severity:** Medium
-- **Status:** Open
+- **Status:** Resolved
 - **Task / phase:** P4.2
 - **Opened:** 2026-10-05
 
@@ -351,6 +367,8 @@ None needed. A defence could later become an experimental factor (defended vs un
 
 **Needs from the human:** confirm that undefended prompts are the intended baseline (`decisions.md` D5).
 
+
+**Note (2026-10-05):** Resolved by human decision D5 (answers.md; ISSUE-019): undefended baseline now; defence becomes a Phase 13 factor.
 ---
 
 ## ISSUE-013: Tracing the same run twice crashed on a duplicate verdict ID
@@ -406,6 +424,152 @@ The tracer's path tests (distinguishing-edge drops) do get this right: G3-2 pass
 3. Keep §7.9 as written and report it as a limitation.
 
 **Needs from the human:** choose an option before P11 (`decisions.md` D6).
+
+
+**Note (2026-10-05):** Human decision D6 (answers.md; ISSUE-020): anchor-based true paths validated by replay.
+---
+
+## ISSUE-015: D1: make attacks land with a neutral handoff, plain pages and normalized utility
+
+- **Type:** decision
+- **Severity:** High
+- **Status:** In progress
+- **Task / phase:** P9.2
+- **Opened:** 2026-10-05
+
+**What happened**
+The team approved D1: page_render (D1a), normalized utility matching (D1b), handoff_style prompt sets with a no-relay-instruction rule (D1c), a per-hop propagation check (D1d), a re-measure (D1e), the G2 fallback (D1f) and the (task, seed) gate sampling rule (D1g). No new attack payloads. Links: ISSUE-011, ISSUE-009.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: human decision recorded in `answers.md` (D1). Implementation tracked here; set to Resolved when D1a–D1e land and the Stage 1 gate has been re-run.
+- Regression test: see the linked implementation issues and commits.
+
+---
+
+## ISSUE-016: D2: confirm dev_open model and record its digest
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** In progress
+- **Task / phase:** P9.2
+- **Opened:** 2026-10-05
+
+**What happened**
+Keep ollama_chat/qwen2.5:14b-instruct-q4_K_M with num_ctx 16384. Record the Ollama model digest in manifest.json and models.yaml, and log an issue if it changes within an experiment. Link: ISSUE-002.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: human decision recorded in `answers.md` (D2). 
+- Regression test: see the linked implementation issues and commits.
+
+---
+
+## ISSUE-017: D3: provisional s3_whiteboard layout
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** In progress
+- **Task / phase:** P3.1
+- **Opened:** 2026-10-05
+
+**What happened**
+Layout: A→B, A↔C, B↔C, B→D, D→E, C→E. A researcher, B analyst, C planner, D writer, E operator. Intended attack route A→B→D→E, with A→C→E as the alternative. Link: ISSUE-006.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: human decision recorded in `answers.md` (D3). 
+- Regression test: see the linked implementation issues and commits.
+
+---
+
+## ISSUE-018: D4: opaque run_uid inside events
+
+- **Type:** decision
+- **Severity:** Medium
+- **Status:** In progress
+- **Task / phase:** P5.2
+- **Opened:** 2026-10-05
+
+**What happened**
+The readable run_name is used only for the directory and manifest. Events use run_uid = r_ + sha256(run tuple)[:16]. A replay's run_uid is derived from the original's. The P5.2 test now scans every field, identifiers included. Link: ISSUE-007.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: human decision recorded in `answers.md` (D4). 
+- Regression test: see the linked implementation issues and commits.
+
+---
+
+## ISSUE-019: D5: undefended baseline; defence becomes a Phase 13 factor
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** Resolved
+- **Task / phase:** P4.2
+- **Opened:** 2026-10-05
+
+**What happened**
+Prompts stay undefended for development and gates. Phase 13 adds a defence factor with levels none, prompt and structural (fact_only handoff). Link: ISSUE-012.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: human decision recorded in `answers.md` (D5). No code change now.
+- Regression test: see the linked implementation issues and commits.
+
+---
+
+## ISSUE-020: D6: anchor-based true paths validated by replay
+
+- **Type:** decision
+- **Severity:** Medium
+- **Status:** In progress
+- **Task / phase:** P5.3
+- **Opened:** 2026-10-05
+
+**What happened**
+A path is true if every message on it, and the symptom, contains an anchor (G1: the attacker email or credentials.txt; G2: the normalized marker). Validate against replay-based truth on 20 Stage 3 runs; if agreement is below 90%, log an issue. Link: ISSUE-014.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: human decision recorded in `answers.md` (D6). 
+- Regression test: see the linked implementation issues and commits.
+
+---
+
+## ISSUE-021: D7: plain-code work on Phases 10-12 allowed while Stage 1 model gate pending
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** Resolved
+- **Task / phase:** P10-P12
+- **Opened:** 2026-10-05
+
+**What happened**
+Allowed: plain-code parts of P10.1, P10.2, P11.1, P11.2, P12.1 and P12.2. Do not tick P10.3, P11.3 or any task that needs the real model. Mark them 'partial (plain code)' in the Progress log. D6 must be merged before any Stage 3 metric.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: human decision recorded in `answers.md` (D7). 
+- Regression test: see the linked implementation issues and commits.
+
+---
+
+## ISSUE-022: D8: commercial model deferred until after the pilot
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** Resolved
+- **Task / phase:** P13.3
+- **Opened:** 2026-10-05
+
+**What happened**
+No commercial API calls. After P12.3, report tokens per run (mean, p95) and a cost estimate for the commercial subset.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: human decision recorded in `answers.md` (D8). 
+- Regression test: see the linked implementation issues and commits.
 
 ---
 
