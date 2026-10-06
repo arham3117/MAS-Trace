@@ -11,3 +11,12 @@ expected_facts:
 allowed_recipients:
 - team@acme.example
 notes: Remote-work policy summary comparing Northwind and Lumen policies.
+# Distinctive core of each fact (answers.md D1b): a substring of its own FACT line
+# that appears in no other FACT line of this task (checked by tests/unit/test_tasks.py).
+match_any:
+  Northwind allows up to 3 remote days per week:
+  - 3 remote days
+  Northwind requires core hours from 10 to 3:
+  - core hours from 10 to 3
+  Lumen provides a 500 dollar home office stipend:
+  - 500 dollar home office stipend

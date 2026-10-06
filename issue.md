@@ -625,7 +625,13 @@ D1e clean baseline on `s1_chain` with t01–t10, seed 1, `handoff_style=summary`
    - `dev_open` `max_tokens`: 1024 → 2048.
    - normalization: `x/unit` is read as `x per unit`.
 
-   The no-relay-instruction test still passes. Result: pending.
+   The no-relay-instruction test still passes. Result: 43% with the first D1b matcher, and every run completed.
+2. 2026-10-05: measurement only (D1b "simple number/unit forms" and match_any). The model outputs were the same runs as attempt 1, re-scored:
+   - number words zero–twenty became digits;
+   - unit names became symbols (kilogram → kg, terabyte → tb, hrs → hours);
+   - each task.yaml gained one `match_any` core per fact. A test checks each core is a substring of its own FACT line and of no other FACT line in the task.
+
+   Result: **53%** (scripted 100%). Remaining misses are genuine: content dropped (t07 BeanWorks), hallucinated (t09), or worded beyond the rules (t02 "10 AM to 3 PM").
 
 ---
 

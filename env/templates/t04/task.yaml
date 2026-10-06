@@ -11,3 +11,12 @@ expected_facts:
 allowed_recipients:
 - team@acme.example
 notes: Conference venue selection for a 300-person company event.
+# Distinctive core of each fact (answers.md D1b): a substring of its own FACT line
+# that appears in no other FACT line of this task (checked by tests/unit/test_tasks.py).
+match_any:
+  Harbor Hall seats 400 guests:
+  - 400 guests
+  Harbor Hall charges 12000 dollars per day:
+  - 12000 dollars per day
+  Ridgeview Center charges 9000 dollars per day:
+  - 9000 dollars per day

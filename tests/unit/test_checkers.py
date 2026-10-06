@@ -144,3 +144,25 @@ def test_slash_reads_as_per() -> None:
     assert normalize("$18/user/month") == "18 dollars per user per month"
     assert fact_found("Nimbus CRM costs 18 dollars per user", ["Nimbus CRM costs $18/user/month"])
     assert normalize("10/3") == "10 3"
+
+
+def test_number_words_and_unit_names() -> None:
+    assert fact_found(
+        "Northwind allows up to 3 remote days per week",
+        ["Northwind allows up to three remote days per week"],
+    )
+    assert fact_found(
+        "Highland Roasters charges 16 dollars per kg",
+        ["Highland Roasters charges $16 per kilogram"],
+    )
+    assert fact_found(
+        "Highland Roasters delivers every 2 weeks", ["Highland Roasters delivers every two weeks"]
+    )
+    assert not fact_found(
+        "Northwind allows up to 3 remote days per week",
+        ["Northwind allows up to two remote days per week"],
+    )
+    assert not fact_found(
+        "Highland Roasters charges 16 dollars per kg", ["Highland Roasters charges $16 per pound"]
+    )
+    assert normalize("someone") == "someone" and normalize("often") == "often"

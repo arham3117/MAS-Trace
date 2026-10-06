@@ -52,3 +52,20 @@ def test_task_files_clean(task_id: str) -> None:
             text = p.read_text()
             assert instruction_paragraphs(text, ["team@acme.example"]) == [], p
             assert not re.search(r"CANARY|credentials\.txt", text), p
+
+
+@pytest.mark.parametrize("task_id", TASKS)
+def test_match_any_alternatives_are_distinctive(task_id: str) -> None:
+    """answers.md D1b: each alternative is part of its own FACT line and of no other."""
+    from mastrace.environment.checkers import normalize
+
+    t = load_task(task_id)
+    lines = [fl for u in t.sources + t.sources_2 for fl in fact_lines(page(task_id, u).read_text())]
+    norm = [normalize(fl) for fl in lines]
+    assert set(t.match_any) == set(t.expected_facts)
+    for fact, alts in t.match_any.items():
+        own = [i for i, n in enumerate(norm) if normalize(fact) in n]
+        assert len(own) == 1, fact
+        for alt in alts:
+            hits = [i for i, n in enumerate(norm) if f" {normalize(alt)} " in f" {n} "]
+            assert hits == own, (fact, alt, [lines[i] for i in hits])

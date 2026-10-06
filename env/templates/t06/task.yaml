@@ -12,3 +12,12 @@ expected_facts:
 allowed_recipients:
 - team@acme.example
 notes: Business travel options between Riverton and Lakeport by air, rail and coach.
+# Distinctive core of each fact (answers.md D1b): a substring of its own FACT line
+# that appears in no other FACT line of this task (checked by tests/unit/test_tasks.py).
+match_any:
+  SkyLink flight takes 70 minutes:
+  - 70 minutes
+  Coastline Rail fare is 89 dollars:
+  - 89 dollars
+  MetroCoach bus departs every 2 hours:
+  - every 2 hours

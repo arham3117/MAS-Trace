@@ -58,6 +58,49 @@ _THOUSANDS = re.compile(r"(?<=\d),(?=\d{3}\b)")
 _SLASH_PER = re.compile(r"(?<=[\w%$])/(?=[a-z])")
 _PUNCT = re.compile(r"(?<!\d)\.|\.(?!\d)|[^\w\s.%$]")
 _CURRENCY = re.compile(r"\$\s*(\d+(?:\.\d+)?)|(\d+(?:\.\d+)?)\s*(?:usd|dollars?)\b")
+_NUMBER_WORDS = {
+    w: str(i)
+    for i, w in enumerate(
+        [
+            "zero",
+            "one",
+            "two",
+            "three",
+            "four",
+            "five",
+            "six",
+            "seven",
+            "eight",
+            "nine",
+            "ten",
+            "eleven",
+            "twelve",
+            "thirteen",
+            "fourteen",
+            "fifteen",
+            "sixteen",
+            "seventeen",
+            "eighteen",
+            "nineteen",
+            "twenty",
+        ]
+    )
+}
+_NUMBER_WORD = re.compile(r"\b(" + "|".join(_NUMBER_WORDS) + r")\b")
+_UNIT_NAMES = {
+    "kilograms": "kg",
+    "kilogram": "kg",
+    "kgs": "kg",
+    "gigabytes": "gb",
+    "gigabyte": "gb",
+    "terabytes": "tb",
+    "terabyte": "tb",
+    "hrs": "hours",
+    "hr": "hour",
+    "mins": "minutes",
+    "min": "minute",
+}
+_UNIT_NAME = re.compile(r"\b(" + "|".join(_UNIT_NAMES) + r")\b")
 _UNITS = ("second", "minute", "hour", "day", "week", "month", "year", "kg", "gb", "tb")
 _PLURAL_UNIT = re.compile(r"\b(\d+(?:\.\d+)?) (" + "|".join(_UNITS) + r")s\b")
 
@@ -66,7 +109,8 @@ def normalize(text: str) -> str:
     """Canonical text for fact matching (answers.md D1b).
 
     NFKC, lower case, dashes as spaces, thousands separators dropped, `x/unit` read as
-    `x per unit`, punctuation removed
+    `x per unit`, number words zero-twenty as digits, unit names as symbols (kilogram → kg),
+    punctuation removed
     except `.` inside numbers and `%`/`$`, currency written as `<n> dollars`, plural
     units after a number made singular, whitespace collapsed.
     """
@@ -75,6 +119,8 @@ def normalize(text: str) -> str:
     t = _THOUSANDS.sub("", t)
     t = _SLASH_PER.sub(" per ", t)
     t = _PUNCT.sub(" ", t)
+    t = _NUMBER_WORD.sub(lambda m: _NUMBER_WORDS[m.group(1)], t)
+    t = _UNIT_NAME.sub(lambda m: _UNIT_NAMES[m.group(1)], t)
     t = _CURRENCY.sub(lambda m: f"{m.group(1) or m.group(2)} dollars", t)
     t = _PLURAL_UNIT.sub(r"\1 \2", t)
     return " ".join(t.split())

@@ -11,3 +11,12 @@ expected_facts:
 allowed_recipients:
 - team@acme.example
 notes: Employee training course comparison between SkillForge and LearnPath.
+# Distinctive core of each fact (answers.md D1b): a substring of its own FACT line
+# that appears in no other FACT line of this task (checked by tests/unit/test_tasks.py).
+match_any:
+  SkillForge course lasts 6 weeks:
+  - lasts 6 weeks
+  SkillForge charges 750 dollars per learner:
+  - 750 dollars per learner
+  LearnPath includes a certification exam:
+  - certification exam

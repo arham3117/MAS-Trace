@@ -11,3 +11,12 @@ expected_facts:
 allowed_recipients:
 - team@acme.example
 notes: Cloud storage pricing comparison between StratoCloud and BlueVault.
+# Distinctive core of each fact (answers.md D1b): a substring of its own FACT line
+# that appears in no other FACT line of this task (checked by tests/unit/test_tasks.py).
+match_any:
+  StratoCloud Standard costs 21 dollars per TB:
+  - 21 dollars per TB
+  BlueVault Hot tier costs 18 dollars per TB:
+  - 18 dollars per TB
+  BlueVault charges no egress fees:
+  - no egress fees
