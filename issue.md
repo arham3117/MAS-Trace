@@ -42,6 +42,8 @@ Rules are in `plan.md` §0.3:
 | ISSUE-024 | Tracer confirmed a downstream secret read as the entry event | bug | High | Resolved | P11.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-025 | D6 anchor labels agree with replay necessity on only 57% of paths (stop condition) | spec-gap | High | Resolved | D6 | 2026-10-05 | 2026-10-05 |
 | ISSUE-026 | P12.2 quarantine and healing in two replays | decision | Medium | Resolved | P12.2 | 2026-10-05 | 2026-10-05 |
+| ISSUE-027 | Utility checker agrees with a hand check on 83% of facts (below 90%) | spec-gap | Medium | Open | D1b | 2026-10-05 | |
+| ISSUE-028 | Different seeds give byte-identical dev_open runs, so D1g sampling repeats runs | spec-gap | Medium | Open | D1g | 2026-10-05 | |
 
 ---
 
@@ -760,6 +762,62 @@ Quarantine remains router-only (I3).
 - Regression test: `tests/integration/test_respond.py`. All 7 configs pass, across stages 1–3: contained, recovered, utility_after ≥ 2/3.
 
 **Needs from the human:** confirm this reading of P12.2.
+
+---
+
+## ISSUE-027: Utility checker agrees with a hand check on 83% of facts (below 90%)
+
+- **Type:** spec-gap
+- **Severity:** Medium
+- **Status:** Open
+- **Task / phase:** D1b (check requested by the team)
+- **Opened:** 2026-10-05
+
+**What happened**
+I hand-checked 20 dev_open clean reports (t01–t10 × seeds 1 and 2) against the D1b checker. Report: `reports/baselines/utility_handcheck.md`.
+- Agreement: **50/60 = 83%**.
+- False negatives: 10. These are 5 distinct facts, each appearing twice because seed 2 duplicated seed 1.
+- False positives: **0**. The checker never credits a fact that is absent or wrong.
+
+**Examples (fact stated, checker says no)**
+- t02: "core hours set from 10 AM to 3 PM" (expected "core hours from 10 to 3").
+- t02: "home office stipend of $500" (word order).
+- t03: bullets under a product heading: "RAM: 16 GB", "Battery Life: up to 14 hours".
+- t05: "There is no charge for egress fees" (expected "no egress fees").
+
+**Suspected cause**
+Phrase matching needs the fact's words in one span. Reports state facts with different word order, with labelled bullets under a heading, or with time formats (AM/PM).
+
+**Options**
+1. More normalization forms: drop am/pm after numbers; `X of $N` ↔ `$N X`; read bullet "Label: value" lines as "<heading> <label> <value>".
+2. Key-element matching: the fact's entity, number and unit must appear within one sentence or bullet block.
+3. Accept the conservative checker and report utility as a lower bound, alongside the hand-check rate.
+
+**Impact**
+Utility is under-counted: hand-judged utility on these reports is 63% (19/30 distinct facts), while the checker gives 53%. The 50% baseline bar is met either way.
+
+---
+
+## ISSUE-028: Different seeds give byte-identical dev_open runs, so D1g sampling repeats runs
+
+- **Type:** spec-gap
+- **Severity:** Medium
+- **Status:** Open
+- **Task / phase:** D1g / P9.2
+- **Opened:** 2026-10-05
+
+**What happened**
+Clean `s1_chain` runs with dev_open (temperature 0, `seed` passed to Ollama) produced **identical model outputs** for seeds 1 and 2, on all 10 tasks and in every model call. The seed changes the request hash, so each seed-2 call ran live, but it returned the same text.
+
+**Impact**
+D1g samples (task, seed) pairs over t01–t10 × seeds {1, 2}. That is effectively **10 distinct runs, each run twice**. The second run of each pair costs a full live run (about 5 minutes) and adds no information. The Stage 1 gate running now uses this rule, and if G1 never lands it re-runs identical runs for G1 and G2 on both configs. Note: attack runs could differ in principle, because the poisoned page changes the context, but seeds do not add diversity at temperature 0.
+
+**Options**
+1. Sample (task, seed) with seed 1 only. That gives up to 10 runs per goal; widen with more tasks (t11+) if needed.
+2. Use a variation that actually changes the input: for example placement `append` and `middle`, already in the attack spec, or the existing g1s0 and g1s1 attacks.
+3. Sample at temperature > 0 for gate checks only. This changes the fixed decision "temperature 0" (§2/§7.7), so it would need a decision-change.
+
+**Needs from the human:** choose an option. The current gate run continues under the approved rule.
 
 ---
 
