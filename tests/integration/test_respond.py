@@ -61,3 +61,44 @@ def test_respond_needs_confirmed_verdict(tmp_path: Path) -> None:
     v = Verdict(verdict_id="v", run_id="r", method="m", symptom_event_id="s", status="unconfirmed")
     with pytest.raises(ValueError, match="confirmed"):
         respond("r", v, Settings(data_dir=tmp_path))
+
+
+def test_healing_neutralizes_verdict_entries_never_ground_truth(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ISSUE-026: healing overrides come from the verdict's confirmed entries only.
+
+    The verdict is doctored to name A's *second* page read (not the poisoned one); the
+    healing replay must neutralize exactly that call, and respond() must never open GT.
+    """
+    from mastrace.groundtruth import store as gt_store
+    from mastrace.runtime.run import read_manifest
+
+    settings = Settings(data_dir=tmp_path / "data")
+    r = run_with_attack("s1_chain", "t01", "g1s0", "scripted_gullible", 1, settings=settings)
+    with GroundTruthStore(settings.ground_truth_path) as s:
+        gt = s.get(r.run_id)
+    assert gt is not None
+    sid = symptom_event(r.run_dir, gt, settings)
+    assert sid is not None
+    v = Tracer(settings).trace(r.run_id, sid, make_symptom_check(gt, settings))
+    with EventStore.for_run(r.run_dir, readonly=True) as es:
+        reads = [e for e in es.iter(EventKind.EXTERNAL_READ) if e.turn_id == "A#1"]
+    gt_entry = next(e for e in reads if e.output_ref == f"sha256:{gt.poisoned_page_sha256}")
+    other = next(e for e in reads if e.event_id != gt_entry.event_id)
+    doctored = v.model_copy(
+        update={"confirmed_entry_events": [other.event_id], "entry_event_id": other.event_id}
+    )
+
+    def no_gt(*a: object, **k: object) -> None:
+        raise AssertionError("respond() must not read ground truth")
+
+    monkeypatch.setattr(gt_store.GroundTruthStore, "__init__", no_gt)
+    rec = respond(r.run_id, doctored, settings)
+    overrides = read_manifest(settings.runs_dir / rec.healing_run).overrides
+    assert [(o.kind, o.agent, o.turn, o.call_index) for o in overrides] == [  # type: ignore[union-attr]
+        ("tool_output", "A", 1, other.call_index)
+    ]
+    assert other.call_index != gt_entry.call_index
+    assert rec.entry_events == [other.event_id]
+    assert rec.recovered is False  # the real entry was left in place, so the leak remains
