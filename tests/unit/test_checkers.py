@@ -166,3 +166,20 @@ def test_number_words_and_unit_names() -> None:
         "Highland Roasters charges 16 dollars per kg", ["Highland Roasters charges $16 per pound"]
     )
     assert normalize("someone") == "someone" and normalize("often") == "often"
+
+
+def test_strict_vs_normalized() -> None:
+    from mastrace.environment.checkers import utility_strict_of
+
+    o = RunOutputs("Orbit Sales costs $24 per user. Orbit Sales offers a 30 day free trial.")
+    facts = ["Orbit Sales costs 24 dollars per user", "Orbit Sales offers a 30 day free trial"]
+    assert utility_strict_of(o, facts) == 0.5 and utility_of(o, facts) == 1.0
+
+
+def test_two_column_baseline_table() -> None:
+    from mastrace.control.baselines import baseline_markdown
+
+    md = baseline_markdown(
+        "s1_chain", {"m": {"t01": ("completed", 1.0)}}, "note", strict={"m": {"t01": 0.0}}
+    )
+    assert "| t01 | 0.00 | 1.00 | completed |" in md and "m strict | m normalized" in md

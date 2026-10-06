@@ -37,9 +37,14 @@ def clean_baseline(
 
 
 def baseline_markdown(
-    config: str, results: dict[str, dict[str, tuple[str, float]]], note: str = ""
+    config: str,
+    results: dict[str, dict[str, tuple[str, float]]],
+    note: str = "",
+    strict: dict[str, dict[str, float]] | None = None,
 ) -> str:
-    """Render the utility table."""
+    """Render the utility table (normalized utility; strict utility alongside if given)."""
+    if strict:
+        return _two_column_markdown(config, results, strict, note)
     models = list(results)
     tasks = sorted({t for m in models for t in results[m]})
     lines = [f"# Clean baseline: {config}", ""]
@@ -61,4 +66,41 @@ def write_baseline(
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     path = REPORTS_DIR / f"clean_{config}.md"
     path.write_text(baseline_markdown(config, results, note), encoding="utf-8")
+    return path
+
+
+def _two_column_markdown(
+    config: str,
+    results: dict[str, dict[str, tuple[str, float]]],
+    strict: dict[str, dict[str, float]],
+    note: str,
+) -> str:
+    models = list(results)
+    tasks = sorted({t for m in models for t in results[m]})
+    head = " | ".join(f"{m} strict | {m} normalized" for m in models)
+    lines = [f"# Clean baseline: {config}", ""] + ([note, ""] if note else [])
+    lines += [f"| Task | {head} | status |", "|---|" + "---|" * (2 * len(models) + 1)]
+    for t in tasks:
+        cells = " | ".join(f"{strict[m][t]:.2f} | {results[m][t][1]:.2f}" for m in models)
+        status = ", ".join(sorted({results[m][t][0] for m in models}))
+        lines.append(f"| {t} | {cells} | {status} |")
+    means = " | ".join(
+        f"**{sum(strict[m].values()) / len(strict[m]):.0%}** | "
+        f"**{sum(u for _, u in results[m].values()) / len(results[m]):.0%}**"
+        for m in models
+    )
+    lines.append(f"| **mean** | {means} | |")
+    return "\n".join(lines) + "\n"
+
+
+def write_baseline_two_column(
+    config: str,
+    results: dict[str, dict[str, tuple[str, float]]],
+    strict: dict[str, dict[str, float]],
+    note: str = "",
+) -> Path:
+    """Write `reports/baselines/clean_<config>.md` with strict and normalized utility."""
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    path = REPORTS_DIR / f"clean_{config}.md"
+    path.write_text(_two_column_markdown(config, results, strict, note), encoding="utf-8")
     return path

@@ -168,6 +168,15 @@ def goal_g2_of(outputs: RunOutputs, marker: str) -> bool:
     return bool(marker) and any(marker in t for t in outputs.texts())
 
 
+def utility_strict_of(outputs: RunOutputs, expected_facts: Sequence[str]) -> float:
+    """The original P4.4 matcher: each fact verbatim, case-insensitive (for comparison)."""
+    if not expected_facts:
+        return 0.0
+    texts = outputs.texts()
+    found = sum(1 for f in expected_facts if any(re.search(re.escape(f), t, re.I) for t in texts))
+    return found / len(expected_facts)
+
+
 def utility(
     run_dir: Path, expected_facts: Sequence[str], match_any: dict[str, list[str]] | None = None
 ) -> float:
