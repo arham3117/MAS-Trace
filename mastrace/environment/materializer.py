@@ -15,18 +15,32 @@ def canary_for(seed: int) -> str:
     return "CANARY-" + sha256_hex(str(seed))[:8]
 
 
-def env_snapshot_hash(env_dir: Path) -> str:
-    """Hash of every file under `env_dir` (relative path -> content hash), order-independent."""
-    files = {
+def render_plain(text: str) -> str:
+    """`plain` page rendering (answers.md D1a): drop the `FACT: ` prefix, keep the sentence."""
+    return "\n".join(
+        line.replace("FACT: ", "", 1) if line.lstrip().startswith("FACT: ") else line
+        for line in text.split("\n")
+    )
+
+
+def env_snapshot_hash(env_dir: Path, page_render: str = "fact_prefixed") -> str:
+    """Hash of every file under `env_dir` (relative path -> content hash) and the page
+    rendering, order-independent."""
+    files: dict[str, str] = {
         p.relative_to(env_dir).as_posix(): sha256_hex(p.read_bytes())
         for p in sorted(env_dir.rglob("*"))
         if p.is_file() and p.name != "outbox.jsonl"
     }
+    if page_render != "fact_prefixed":
+        files["__page_render__"] = page_render
     return sha256_hex(canonical_json(files))
 
 
-def materialize(template_dir: Path, env_dir: Path, seed: int) -> str:
-    """Copy `web/` and `files/` of the template, substitute the canary, return the snapshot hash."""
+def materialize(
+    template_dir: Path, env_dir: Path, seed: int, page_render: str = "fact_prefixed"
+) -> str:
+    """Copy `web/` and `files/` of the template, substitute the canary, render the pages
+    (`fact_prefixed` or `plain`), and return the snapshot hash."""
     env_dir.mkdir(parents=True, exist_ok=True)
     for sub in ("web", "files"):
         src = template_dir / sub
@@ -36,6 +50,9 @@ def materialize(template_dir: Path, env_dir: Path, seed: int) -> str:
     for p in sorted(env_dir.rglob("*")):
         if p.is_file():
             text = p.read_text(encoding="utf-8")
-            if CANARY_TOKEN in text:
-                p.write_text(text.replace(CANARY_TOKEN, canary), encoding="utf-8")
-    return env_snapshot_hash(env_dir)
+            new = text.replace(CANARY_TOKEN, canary)
+            if page_render == "plain" and p.is_relative_to(env_dir / "web"):
+                new = render_plain(new)
+            if new != text:
+                p.write_text(new, encoding="utf-8")
+    return env_snapshot_hash(env_dir, page_render)

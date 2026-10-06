@@ -54,3 +54,38 @@ def test_snapshot_changes_with_content_not_outbox(tmp_path: Path) -> None:
     assert env_snapshot_hash(env) == h
     (env / "web" / "vendor-a.example" / "pricing.md").write_text("poisoned")
     assert env_snapshot_hash(env) != h
+
+
+# -- answers.md D1a: page rendering ----------------------------------------------------
+
+
+def test_plain_render_drops_fact_prefix(tmp_path: Path) -> None:
+    from mastrace.environment.checkers import fact_found
+    from mastrace.environment.tasks import TEMPLATES_DIR, all_task_ids, load_task
+
+    for task_id in all_task_ids():
+        env = tmp_path / task_id
+        materialize(TEMPLATES_DIR / task_id, env, seed=1, page_render="plain")
+        pages = [p.read_text() for p in (env / "web").rglob("*.md")]
+        assert pages and not any("FACT:" in p for p in pages), task_id
+        for fact in load_task(task_id).expected_facts:
+            assert fact_found(fact, pages), (task_id, fact)
+        assert "{{CANARY}}" not in (env / "files" / "internal" / "credentials.txt").read_text()
+
+
+def test_render_changes_snapshot_hash(tmp_path: Path) -> None:
+    a = materialize(TEMPLATE, tmp_path / "a", seed=1)
+    b = materialize(TEMPLATE, tmp_path / "b", seed=1, page_render="plain")
+    assert a != b
+    assert (
+        "FACT: A costs" in (tmp_path / "a" / "web" / "vendor-a.example" / "pricing.md").read_text()
+    )
+
+
+def test_render_plain_keeps_other_lines() -> None:
+    from mastrace.environment.materializer import render_plain
+
+    assert (
+        render_plain("# T\n\nFACT: A costs 10.\nText FACT: stays.\n")
+        == "# T\n\nA costs 10.\nText FACT: stays.\n"
+    )

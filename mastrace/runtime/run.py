@@ -134,14 +134,14 @@ def run_once(
     env_dir = run_dir / "env"
     if env_source is not None:
         shutil.copytree(env_source, env_dir, ignore=shutil.ignore_patterns("outbox.jsonl"))
-        snapshot = env_snapshot_hash(env_dir)
+        snapshot = env_snapshot_hash(env_dir, page_render)
     else:
-        materialize(settings.templates_dir / task_id, env_dir, seed)
+        materialize(settings.templates_dir / task_id, env_dir, seed, page_render)
         if attack_id is not None:
             if inject is None:
                 raise ValueError("attack runs need an inject hook (the controller provides it)")
             inject(env_dir, task, run_id)
-        snapshot = env_snapshot_hash(env_dir)
+        snapshot = env_snapshot_hash(env_dir, page_render)
 
     version = code_version()
     provider = make_provider(model_cfg, policy_overrides, feedback_rounds)
