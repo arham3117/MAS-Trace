@@ -38,7 +38,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-020 | D6: anchor-based true paths validated by replay | decision | Medium | In progress | P5.3 | 2026-10-05 |  |
 | ISSUE-021 | D7: plain-code work on Phases 10-12 allowed while Stage 1 model gate pending | decision | Low | Resolved | P10-P12 | 2026-10-05 | 2026-10-05 |
 | ISSUE-022 | D8: commercial model deferred until after the pilot | decision | Low | Resolved | P13.3 | 2026-10-05 | 2026-10-05 |
-| ISSUE-023 | Clean baseline with `summary` handoff and `plain` pages is below 50% | spec-gap | High | In progress | D1e | 2026-10-05 | |
+| ISSUE-023 | Clean baseline with `summary` handoff and `plain` pages is below 50% | spec-gap | High | Resolved | D1e | 2026-10-05 | 2026-10-05 |
 | ISSUE-024 | Tracer confirmed a downstream secret read as the entry event | bug | High | Resolved | P11.2 | 2026-10-05 | 2026-10-05 |
 
 ---
@@ -604,7 +604,7 @@ No commercial API calls. After P12.3, report tokens per run (mean, p95) and a co
 
 - **Type:** spec-gap
 - **Severity:** High
-- **Status:** In progress
+- **Status:** Resolved
 - **Task / phase:** D1e (P4.5 re-measure)
 - **Opened:** 2026-10-05
 
@@ -633,6 +633,11 @@ D1e clean baseline on `s1_chain` with t01–t10, seed 1, `handoff_style=summary`
 
    Result: **53%** (scripted 100%). Remaining misses are genuine: content dropped (t07 BeanWorks), hallucinated (t09), or worded beyond the rules (t02 "10 AM to 3 PM").
 
+
+**Resolution** (2026-10-05)
+- Commit: efc64e4
+- Fix: Summary prompt iteration 1 (sentences, writer uses its messages, max_tokens 2048) plus the D1b matcher extensions and match_any cores. Baseline is now dev_open 53%, scripted 100% (reports/baselines/clean_s1_chain.md).
+- Regression test: tests/unit/test_checkers.py (paraphrase and wrong-fact tests), tests/unit/test_tasks.py::test_match_any_alternatives_are_distinctive
 ---
 
 ## ISSUE-024: Tracer confirmed a downstream secret read as the entry event

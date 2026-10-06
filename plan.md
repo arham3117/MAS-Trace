@@ -1046,6 +1046,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P10.2 · 5b6f33e · plain code (D7): acceptance = G2-2 stress (4 msgs/direction, feedback_rounds 3), tracer finishes, each event visited once, entry A#1, 5/5 PASS
 - 2026-10-05 · P11.1 · 98c1be3 · plain code (D7): stage-3 path tests by distinguishing edge; G3-1 both paths 5/5, G3-2 causal path with C resistant 5/5; Stage 3 metrics wait for D6
 - 2026-10-05 · P11.2 · 94262c4 · candidate pairs confirm independent causes; scorer compares entry sets; derived-candidate rule (ISSUE-024)
+- 2026-10-05 · D1e · efc64e4 · clean baseline (summary, plain): dev_open 53%, scripted 100% (ISSUE-023 resolved)
 
 ---
 
