@@ -55,3 +55,41 @@ def test_run_versions_section(tmp_path: Path) -> None:
     )
     text = "\n".join(gates.run_versions_section(p))
     assert "`aaa`: 2" in text and "Dirty-stamped runs: **1**" in text
+
+
+def test_report_includes_propagation_and_versions(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """D1d / ISSUE-029: the written report really contains both sections."""
+    import json
+
+    monkeypatch.setattr(gates, "GATES_DIR", tmp_path)
+    cur = tmp_path / "_current.jsonl"
+    hops = {h: {"anchor": h == "A", "overlap": False, "jaccard": 0.1} for h in gates.HOPS}
+    cur.write_text(
+        "\n".join(
+            json.dumps(x)
+            for x in [
+                {
+                    "type": "propagation",
+                    "config": "s1_chain",
+                    "goal": "G1",
+                    "hops": hops,
+                    "entry_handling": "omitted",
+                },
+                {"type": "run_version", "run": "r", "code_version": "abc1234"},
+            ]
+        )
+    )
+    p = gates.write_report(
+        1,
+        [res("G1-1[dev_open]", "INCONCLUSIVE")],
+        1,
+        day=date(2026, 10, 5),
+        current=cur,
+        code="7a691d6",
+    )
+    text = p.read_text()
+    assert "code 7a691d6" in text
+    assert "## Propagation by hop" in text and "| s1_chain | G1 | 1 | 1 | 0 | 0 |" in text
+    assert "## Code versions of real-model runs" in text and "Dirty-stamped runs: **0**" in text

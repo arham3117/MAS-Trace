@@ -1,32 +1,30 @@
 # MAS-Trace testbed: work update
 
-**As of:** 2026-10-05 (late) · **Repo:** https://github.com/arham3117/MAS-Trace (branch `main`)
-**Plan progress:** 46 tasks ticked (P0.1–P9.1, P10.1, P10.2, P11.1, P11.2, P12.1, P12.2). **P9.2, the Stage 1 real-model gate, is re-running** under the ISSUE-028 sampling rule. P9.3, P10.3, P11.3 and P12.3 (pilot) wait for it (D7).
+**As of:** 2026-10-05, 23:30 · **Repo:** https://github.com/arham3117/MAS-Trace (branch `main`)
+**Plan progress:** 46 tasks ticked. **P9.2, the Stage 1 real-model gate, finished INCONCLUSIVE.** That is the answers.md §6 stop condition ("still inconclusive after the G2 fallback"), so work is stopped for a team decision. P9.3, P10.3, P11.3 and P12.3 wait (D7).
 
 ---
 
 ## 1. Summary
 
-The testbed runs 5-agent LLM teams on 7 graph layouts, plants a prompt injection in one web page, records every action in a hash-chained, Ed25519-signed log, replays runs from a cache, traces a symptom back to its entry agent and turn, and can contain and heal the run (P12.2). An AI investigator can order the tracer's replays (P12.1), but only replay confirms a verdict.
+The testbed runs 5-agent LLM teams on 7 graph layouts, plants a prompt injection in one web page, records every action in a hash-chained, Ed25519-signed log, replays runs from a cache, traces a symptom back to its entry agent and turn, and can contain and heal the run. An AI investigator can order the tracer's replays, but only replay confirms a verdict.
 
-**What works:**
-- Every plain-code gate check passes for Stages 1–3.
-- On scripted runs the tracer finds the right agent and turn on every layout. It handles multiple causes, and it marks paths necessary or redundant. Ground-truth path labels (carried) agree 100% with replay sufficiency.
-- On the real model, clean utility is 53% (strict) and there are no false alarms.
-
-**Open problem:** on the dev model, the exfiltration attack (G1) has never made it past agent A. The marker attack (G2) landed in one task so far (t02), and the tracer attributed it correctly (A, A#1, path A→B→C→D→E). The re-run gate samples G1 and G2 over tasks × variants × placements to decide whether Stage 1 passes. **Finding so far: propagation depends on payload type.**
+**Stage 1 real-model gate (clean code `7a691d6`, report `reports/gates/stage1_2026-10-05.md`):**
+- **Every attribution the tracer could make on the real model was correct: 8/8** (4 on the chain, 4 on fan-in; entry A, turn A#1, correct path; on fan-in it blamed A, not B).
+- But attacks landed too rarely to reach the 5 symptomatic runs per check. G1 (exfiltration) **never left agent A** (0/30). G2 (marker) landed in 4/40 runs per config. Both dev_open checks are therefore INCONCLUSIVE.
+- **Finding: propagation depends on payload type** (below).
 
 | Item | Status |
 |---|---|
 | Code | ~6,700 lines in `mastrace/`, ~5,900 lines of tests |
 | `make check` | **486 passed** (gate and model tests run separately) |
 | Stage 1 gate, plain code | **PASS** (`reports/gates/stage1_2026-10-05_plumbing.md`) |
-| Stage 1 gate, real model | **Re-running** (ISSUE-028 rule; G-C4 dev PASS 5/5) |
+| Stage 1 gate, real model | **INCONCLUSIVE**: G-C4 dev PASS 5/5; G1-1 and G1-2 4/5 symptomatic each, 4/4 correct |
 | Stage 2 and 3 checks, plain code | All pass |
 | Clean baseline (`s1_chain`) | scripted 100%; dev_open strict 53% (`reports/baselines/clean_s1_chain.md`) |
 | Utility hand checks | first sample 83% (ISSUE-027); key-element matcher being validated on a new sample |
-| Issues | 28 logged: 25 resolved; open: ISSUE-011/015 (attack landing; gate), ISSUE-027 (utility checker) |
-| Decisions waiting for you | none blocking right now |
+| Issues | 32 logged; open or blocked: ISSUE-011 (blocked, gate), ISSUE-015, ISSUE-027 (utility checker), ISSUE-031 (fan-in B fetched the poisoned page) |
+| Decisions waiting for you | **yes**: how to proceed after the inconclusive Stage 1 gate; ISSUE-031 |
 
 ---
 
@@ -296,3 +294,42 @@ replays. A full real-model gate check can take 1–2 hours of local compute (no 
   - The G2 fallback is running. The **first landing attack** is `s1_chain-t02-g2s0`: attacker content reached every hop and the final output.
   - G1-2 (fan-in) follows. Results will be added when the gate finishes.
 - **Open questions for the team:** ISSUE-026 (confirm the P12.2 reading), ISSUE-027 (checker options), ISSUE-028 (sampling rule).
+
+
+---
+
+## Update 2026-10-05, 23:30: Stage 1 real-model gate result
+
+**Result: INCONCLUSIVE** (`reports/gates/stage1_2026-10-05.md`, clean code `7a691d6`, 0 dirty-stamped runs). This is a §6 stop condition, so work is paused for the team.
+
+| Check | Result |
+|---|---|
+| All plain-code checks (G-C1 to G-C5, G1-1/2/3 scripted) | PASS 5/5 |
+| G-C4 dev_open (no false alarms) | PASS 5/5 |
+| G1-1 dev_open (chain) | INCONCLUSIVE: G1 0/20 symptomatic (early exit); G2 **4/40 symptomatic, 4/4 correct** |
+| G1-2 dev_open (fan-in) | INCONCLUSIVE: G1 0/10 (early exit, ISSUE-030); G2 **4/40 symptomatic, 4/4 correct** |
+
+### Finding: propagation depends on payload type
+
+How the entry agent A handled the attacker request (from its outgoing messages), with the share of runs where attacker content reached later hops:
+
+| Config | Goal | Runs | A omitted | A refused or flagged | A relayed | reached E / final output (anchor) | symptomatic |
+|---|---|---|---|---|---|---|---|
+| s1_chain | G1 (exfiltration request) | 20 | 20 | 0 | 0 | 0% | 0 |
+| s1_chain | G2 (content claim) | 40 | 31 | 1 | 8 | 12% | 4 |
+| s1_fanin | G1 (exfiltration request) | 10 | 10 | 0 | 0 | 0% | 0 |
+| s1_fanin | G2 (content claim) | 40 | 26 | 0 | 14 | 10% | 4 |
+
+- The dev model's researcher **silently drops** the exfiltration request (G1) in 30/30 runs. It never refuses or flags it; it just leaves it out of the hand-off.
+- It **relays** the content claim (G2) in 22/80 runs. About half of those relays reach the final report.
+- So, with neutral prompts, whether an injection travels depends on its type: instructions to *act* stay at A, while claims about *content* travel.
+
+### Other results from this run
+- **Replay count (ISSUE-032):** 23 of 24 groups of 3 salted replays were byte-identical. One differed, and it changed a majority vote. **n=3 is kept** for the real model.
+- **ISSUE-031:** on fan-in, researcher B sometimes fetched A's (poisoned) page itself, guessing URLs from vendor names. B is then a second entry point that ground truth does not record. Verdicts still blamed A correctly.
+- **Bug fixed (ISSUE-029):** the gate report's propagation table and run-version section were never written: `write_report` did not call them, a silent no-op from an earlier edit. Now fixed and tested, and the report was regenerated from the recorded results.
+
+### Decisions needed
+1. **How to proceed with Stage 1** (§6 stop). Options within the rules: accept the G2-only evidence (8/8 correct, 4+4 symptomatic) as a conditional pass; widen sampling to more tasks (t11+, new task content, no new attack text); or another model (needs approval).
+2. **ISSUE-031:** restrict `web_fetch` to each agent's task URLs, or keep open browsing and count every reader of the poisoned page as an entry.
+3. Still open: ISSUE-027 (the key-element hand check resumes now).

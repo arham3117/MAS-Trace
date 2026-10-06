@@ -139,12 +139,23 @@ def overall_of(results: list[dict[str, object]], pytest_exit: int) -> str:
 
 
 def write_report(
-    stage: int, results: list[dict[str, object]], pytest_exit: int, day: date | None = None
+    stage: int,
+    results: list[dict[str, object]],
+    pytest_exit: int,
+    day: date | None = None,
+    current: Path | None = None,
+    code: str | None = None,
 ) -> Path:
-    """Render the §9.4 template."""
+    """Render the §9.4 template, plus propagation by hop (answers.md D1d), the entry agent's
+    handling of attacker requests, and the code versions of real-model runs (ISSUE-029).
+
+    `current` is the results file (default `_current.jsonl`); `code` overrides the code
+    version in the header (used when re-rendering a finished gate's results).
+    """
     day = day or date.today()
+    current = current or CURRENT
     lines = [
-        f"# Gate report: Stage {stage} ({day.isoformat()}, code {code_version()})",
+        f"# Gate report: Stage {stage} ({day.isoformat()}, code {code or code_version()})",
         "",
         "| Check | Result | Runs | Notes / run ids |",
         "|---|---|---|---|",
@@ -158,6 +169,8 @@ def write_report(
             f"| {r['check']} | {r['result']} {r['passed']}/{r['total']} | {len(runs)} | "
             f"{notes + ' · ' if notes else ''}{sample} |"
         )
+    lines += propagation_table(read_propagation(current))
+    lines += run_versions_section(current)
     lines += [
         "",
         f"**Overall:** {overall_of(results, pytest_exit)}",
