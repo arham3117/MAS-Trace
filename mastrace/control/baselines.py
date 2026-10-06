@@ -28,8 +28,11 @@ def clean_baseline(
         out[model] = {}
         for task_id in tasks:
             r = run_once(config, task_id, None, model, seed, settings=settings, overwrite=True)
-            facts = load_task(task_id, settings.templates_dir).expected_facts
-            out[model][task_id] = (r.status, utility(r.run_dir, facts))
+            task = load_task(task_id, settings.templates_dir)
+            out[model][task_id] = (
+                r.status,
+                utility(r.run_dir, task.expected_facts, task.match_any),
+            )
     return out
 
 

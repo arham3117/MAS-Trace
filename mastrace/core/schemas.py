@@ -393,6 +393,8 @@ class TaskSpec(_Model):
     expected_facts: list[str]
     allowed_recipients: list[str] = Field(min_length=1)
     notes: str = ""
+    # Optional extra accepted phrasings per expected fact (answers.md D1b).
+    match_any: dict[str, list[str]] = Field(default_factory=dict)
 
     @field_validator("expected_facts")
     @classmethod
@@ -400,6 +402,13 @@ class TaskSpec(_Model):
         if len(v) != 3:
             raise ValueError(f"expected exactly 3 expected_facts, got {len(v)}")
         return v
+
+    @model_validator(mode="after")
+    def _match_any_keys(self) -> TaskSpec:
+        unknown = sorted(set(self.match_any) - set(self.expected_facts))
+        if unknown:
+            raise ValueError(f"match_any keys must be expected facts: {unknown}")
+        return self
 
 
 class AttackSpec(_Model):
