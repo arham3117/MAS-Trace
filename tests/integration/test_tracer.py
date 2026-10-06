@@ -125,7 +125,7 @@ def test_whiteboard_attack_and_trace(settings: Settings) -> None:
     v2 = Tracer(s2).trace(r2.run_id, sid2, make_symptom_check(gt2, s2))
     assert (v2.status, v2.entry_turn) == ("confirmed", "A#1")
     marks = {tuple(x["path"]): x["status"] for x in v2.replays if x["kind"] == "path"}
-    assert marks == {("A", "B", "D", "E"): "causal", ("A", "C", "E"): "non_causal"}
+    assert marks == {("A", "B", "D", "E"): "necessary", ("A", "C", "E"): "non_causal"}
 
 
 def test_downstream_secret_read_is_not_the_entry(settings: Settings) -> None:
@@ -138,3 +138,12 @@ def test_downstream_secret_read_is_not_the_entry(settings: Settings) -> None:
     assert reads and all(singles[e] for e in reads)  # the read does remove the symptom
     assert v.confirmed_entry_events == [v.entry_event_id]
     assert v.entry_event_id not in reads
+
+
+def test_overdetermined_paths_marked_redundant(settings: Settings) -> None:
+    """All gullible on the mixed layout: both routes deliver; neither is necessary."""
+    r, gt, sid = setup(settings, config="s3_mixed_two_paths")
+    v = Tracer(settings).trace(r.run_id, sid, make_symptom_check(gt, settings))
+    marks = {tuple(x["path"]): x["status"] for x in v.replays if x["kind"] == "path"}
+    assert marks == {("A", "B", "C", "E"): "redundant", ("A", "B", "D", "E"): "redundant"}
+    assert all("keep_only" in x for x in v.replays if x["kind"] == "path")

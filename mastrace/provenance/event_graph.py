@@ -60,6 +60,10 @@ class EventGraph:
                     queue.append((parent, d + 1))
         return depth
 
+    def ancestor_set(self, event_id: str) -> set[str]:
+        """Every ancestor of `event_id` (no depths, does not touch `visits`)."""
+        return set(nx.ancestors(self.g, event_id))
+
     def descendants(self, event_id: str) -> set[str]:
         """Every event built (transitively) from `event_id`."""
         return set(nx.descendants(self.g, event_id))

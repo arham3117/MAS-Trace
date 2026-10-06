@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 from typing import Any
 
@@ -152,3 +153,37 @@ def test_entry_sets_compared() -> None:
     assert score("r", "m", both, res)["entry_set_correct"] is True
     assert score("r", "m", one, res)["entry_set_correct"] is False
     assert score("r", "m", verdict(), RES)["entry_set_correct"] is True
+
+
+# -- ISSUE-025: three path labels ---------------------------------------------------------
+
+from mastrace.evaluation.path_validation import PathLabel  # noqa: E402
+
+ABCE, ABDE = ("A", "B", "C", "E"), ("A", "B", "D", "E")
+
+
+def marks(**m: str) -> list[dict[str, Any]]:
+    paths = {"c": list(ABCE), "d": list(ABDE)}
+    return [{"kind": "path", "path": paths[k], "status": st} for k, st in m.items()]
+
+
+def test_overdetermined_redundant_marks() -> None:
+    labels = [PathLabel("r", ABCE, True, False, True), PathLabel("r", ABDE, True, False, True)]
+    v = verdict(paths=[list(ABCE), list(ABDE)], replays=marks(c="redundant", d="redundant"))
+    row = score("r", "m", v, RES, labels)
+    assert row["overdetermined"] is True
+    assert json.loads(row["responsibility"]) == {"A→B→C→E": 0.5, "A→B→D→E": 0.5}
+    assert row["marks_vs_carried"] == 1.0 and row["marks_vs_necessary"] == 1.0
+    assert row["necessary_precision"] is None and row["necessary_recall"] is None
+
+
+def test_single_necessary_path() -> None:
+    labels = [PathLabel("r", ABCE, False, False, False), PathLabel("r", ABDE, True, True, True)]
+    v = verdict(replays=marks(c="non_causal", d="necessary"))
+    row = score("r", "m", v, RES, labels)
+    assert row["overdetermined"] is False
+    assert json.loads(row["responsibility"]) == {"A→B→C→E": 0.0, "A→B→D→E": 1.0}
+    assert row["necessary_precision"] == 1.0 and row["necessary_recall"] == 1.0
+    assert row["marks_vs_carried"] == 1.0 and row["marks_vs_necessary"] == 1.0
+    wrong = score("r", "m", verdict(replays=marks(c="necessary", d="non_causal")), RES, labels)
+    assert wrong["marks_vs_carried"] == 0.0 and wrong["necessary_precision"] == 0.0

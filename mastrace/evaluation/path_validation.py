@@ -1,8 +1,13 @@
-"""Validate anchor-based true paths against replay-based truth (answers.md D6).
+"""Three ground-truth labels per path, and their validation (answers.md D6, ISSUE-025).
 
-Replay truth for a path: drop its distinguishing edge (the first edge no other candidate
-path uses) and check whether the symptom survives. Paths without a distinguishing edge are
-`inseparable` and not compared.
+- carried: every hop of the path, and the symptom, contain an anchor (`true_paths`).
+- sufficient: a replay that blocks every other path's distinguishing edge (keeps only this
+  path) still produces the symptom.
+- necessary: a replay that drops this path's distinguishing edge removes the symptom.
+
+Validation compares carried with sufficient (bar 90%). Under redundancy no path is
+necessary, so "necessary" is reported separately and is not a validation reference.
+Paths without a distinguishing edge are `inseparable` for the necessity test.
 """
 
 from __future__ import annotations
@@ -31,8 +36,17 @@ class PathLabel:
     sufficient: bool | None = None  # sufficiency: drop every other path's distinguishing edge
 
     @property
+    def carried(self) -> bool:
+        return self.anchor_true
+
+    @property
+    def necessary(self) -> bool | None:
+        return self.replay_true
+
+    @property
     def agrees(self) -> bool | None:
-        return None if self.replay_true is None else self.anchor_true == self.replay_true
+        """carried vs sufficient (the validation reference, ISSUE-025)."""
+        return None if self.sufficient is None else self.anchor_true == self.sufficient
 
 
 def label_run(run_id: str, settings: Settings) -> list[PathLabel]:
@@ -76,37 +90,43 @@ def label_run(run_id: str, settings: Settings) -> list[PathLabel]:
 
 
 def report(labels: list[PathLabel], title: str) -> str:
-    """Markdown summary with both agreements and every (run, path) row."""
+    """Markdown summary: carried vs sufficient (validation), plus the necessity view."""
     compared = [x for x in labels if x.agrees is not None]
     agree = sum(bool(x.agrees) for x in compared)
     pct = agree / len(compared) if compared else 0.0
-    suff = [x for x in labels if x.sufficient is not None]
-    s_agree = sum(x.anchor_true == x.sufficient for x in suff)
-    s_pct = s_agree / len(suff) if suff else 0.0
-    runs = len({x.run_id for x in labels})
+    nec = [x for x in labels if x.necessary is not None]
+    n_agree = sum(x.carried == x.necessary for x in nec)
+    by_run: dict[str, list[PathLabel]] = {}
+    for x in labels:
+        by_run.setdefault(x.run_id, []).append(x)
+    over = sum(
+        1
+        for xs in by_run.values()
+        if sum(bool(x.sufficient) for x in xs) >= 2 and not any(x.necessary for x in xs)
+    )
     lines = [
         f"# {title}",
         "",
-        f"- Runs: {runs}; (run, path) pairs: {len(labels)}; compared: {len(compared)}; "
-        f"inseparable: {len(labels) - len(compared)}",
-        f"- **Agreement with replay necessity (answers.md D6 rule): {agree}/{len(compared)} "
-        f"= {pct:.0%}** (threshold 90%)",
-        f"- Agreement with replay sufficiency (alternative, for information): "
-        f"{s_agree}/{len(suff)} = {s_pct:.0%}",
+        f"- Runs: {len(by_run)}; (run, path) pairs: {len(labels)}",
+        f"- **Validation, carried vs sufficient: {agree}/{len(compared)} = {pct:.0%}** "
+        "(bar 90%, ISSUE-025)",
+        f"- For information, carried vs necessary: {n_agree}/{len(nec)} "
+        f"(not a valid reference under redundancy)",
+        f"- Overdetermined runs (≥ 2 sufficient paths, none necessary): {over}/{len(by_run)}",
         "",
-        "Necessity: dropping this path's distinguishing edge removes the symptom. "
-        "Sufficiency: with every other path's distinguishing edge dropped, the symptom "
-        "still occurs.",
-        "",
-        "| Run | Path | Anchor-true | Necessary (replay) | Agree | Sufficient (replay) |",
-        "|---|---|---|---|---|---|",
+        "| Run | Path | Carried | Sufficient | Necessary | Responsibility | Agree |",
+        "|---|---|---|---|---|---|---|",
     ]
-    for x in labels:
-        rt = "inseparable" if x.replay_true is None else str(x.replay_true)
-        ag = "" if x.agrees is None else ("yes" if x.agrees else "**no**")
-        lines.append(
-            f"| {x.run_id} | {'→'.join(x.path)} | {x.anchor_true} | {rt} | {ag} | {x.sufficient} |"
-        )
+    for run, xs in by_run.items():
+        m = sum(bool(x.sufficient) for x in xs)
+        for x in xs:
+            resp = f"{1 / m:.2f}" if x.sufficient and m else "0"
+            nec_s = "inseparable" if x.necessary is None else str(x.necessary)
+            ag = "" if x.agrees is None else ("yes" if x.agrees else "**no**")
+            lines.append(
+                f"| {run} | {'→'.join(x.path)} | {x.carried} | {x.sufficient} | {nec_s} | "
+                f"{resp} | {ag} |"
+            )
     return "\n".join(lines) + "\n"
 
 

@@ -26,7 +26,7 @@ def test_g3_1_finds_every_path(lab: Lab) -> None:
 def causal_ok(r: RunResult, v: Verdict) -> bool:
     marks = {tuple(x["path"]): x["status"] for x in v.replays if x["kind"] == "path"}
     return (
-        marks.get(("A", "B", "D", "E")) == "causal"
+        marks.get(("A", "B", "D", "E")) == "necessary"
         and marks.get(("A", "B", "C", "E")) == "non_causal"
     )
 

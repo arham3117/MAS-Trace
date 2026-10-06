@@ -698,6 +698,14 @@ This is a difference in definitions, not a labelling bug. Anchors measure whethe
 **Workaround (if any)**
 Anchor-based `true_paths` are merged as code. Per answers.md D6/§6 they are **not used in any report** until the team decides. ISSUE-014 and ISSUE-020 stay open.
 
+
+**Note (2026-10-05): human decision**
+Report both, using three labels per path:
+- **carried**: the anchor labels;
+- **sufficient**: a keep-only replay still produces the symptom;
+- **necessary**: a drop replay removes the symptom.
+
+The answers.md comparison against "necessary" used the wrong reference under redundancy. Validation now compares carried with sufficient, and the bar stays 90%.
 ---
 
 <!--

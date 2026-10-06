@@ -81,6 +81,20 @@ def is_candidate(e: EventRecord) -> bool:
     return e.kind == EventKind.TOOL_CALL and e.meta.get("source") == "internal"
 
 
+def select_entries(graph: EventGraph, confirmed: Sequence[str]) -> list[str]:
+    """Keep the most upstream confirmed candidates (ISSUE-024, general rule).
+
+    A confirmed candidate that descends from another confirmed candidate is a consequence
+    of that entry (for example a file read the attacker's text asked for), not an entry
+    point. Order (ranking) is preserved.
+    """
+    out = []
+    for c in confirmed:
+        if not any(o != c and c in graph.descendants(o) for o in confirmed):
+            out.append(c)
+    return out
+
+
 class Tracer:
     """Plain-code tracer. Reads the run log; never reads ground truth (I8)."""
 
@@ -124,10 +138,12 @@ class Tracer:
             )
             if ok:
                 confirmed.append(e.event_id)
-        # An entry point is where attacker content came in from outside. A candidate whose
-        # request was caused by content another candidate sent through a message (e.g. the
-        # operator reading credentials.txt because a relayed note told it to) is "derived":
-        # neutralizing it also removes the symptom, but it is downstream of the entry.
+        # An entry point is where attacker content came in from outside. A confirmed
+        # candidate downstream of another confirmed candidate is a consequence of it
+        # (select_entries). If every remaining confirmed candidate was reached through a
+        # message from another top candidate ("derived"), the true entries did not confirm
+        # on their own (independent causes), so pairs are tried.
+        confirmed = select_entries(graph, confirmed)
         derived = {e.event_id for e in top if self._derived(graph, e, top)}
         upstream = [c for c in confirmed if c not in derived]
         if upstream:
@@ -286,30 +302,55 @@ class Tracer:
                 return [], []
             return [min(all_paths, key=lambda p: (len(p), p))], []
         paths = all_paths[: self.cfg.max_paths]
+        dist: dict[tuple[str, ...], tuple[str, str] | None] = {}
+        for path in paths:
+            others = {e for p in paths if p != path for e in pairwise(p)}
+            dist[tuple(path)] = next((e for e in pairwise(path) if e not in others), None)
         results: list[dict[str, Any]] = []
         for path in paths:
-            edges = list(pairwise(path))
-            others = {e for p in paths if p != path for e in pairwise(p)}
-            dist = next((e for e in edges if e not in others), None)
-            if dist is None:
+            d = dist[tuple(path)]
+            if d is None:
                 results.append(
                     {"kind": "path", "path": path, "status": "inseparable", "replay_run_ids": []}
                 )
                 continue
-            drops = self._drops_for_edge(graph, entry_turn, symptom, dist)
+            drops = self._drops_for_edge(graph, entry_turn, symptom, d)
             ids, present = self._replay(run_id, drops, n, check)
-            causal = sum(present) * 2 < len(present)
+            necessary = sum(present) * 2 < len(present)
             results.append(
                 {
                     "kind": "path",
                     "path": path,
-                    "edge": list(dist),
-                    "overrides": [d.model_dump(mode="json") for d in drops],
+                    "edge": list(d),
+                    "overrides": [o.model_dump(mode="json") for o in drops],
                     "replay_run_ids": ids,
                     "symptom_present": present,
-                    "status": "causal" if causal else "non_causal",
+                    "status": "necessary" if necessary else "non_causal",
                 }
             )
+        if results and not any(r["status"] == "necessary" for r in results):
+            # Overdetermined symptom: no single path is necessary. Keep only one path at a
+            # time (block every other path's distinguishing edge); if the symptom survives,
+            # the path is sufficient on its own: "redundant".
+            for r in results:
+                if r["status"] == "inseparable":
+                    continue
+                keep = tuple(r["path"])
+                blocks = [
+                    o
+                    for p, e in dist.items()
+                    if p != keep and e is not None
+                    for o in self._drops_for_edge(graph, entry_turn, symptom, e)
+                ]
+                ids, present = self._replay(run_id, blocks, n, check)
+                sufficient = sum(present) * 2 > len(present)
+                r["keep_only"] = {
+                    "overrides": [o.model_dump(mode="json") for o in blocks],
+                    "replay_run_ids": ids,
+                    "symptom_present": present,
+                }
+                r["replay_run_ids"] = r["replay_run_ids"] + ids
+                r["status"] = "redundant" if sufficient else "non_causal"
         return paths, results
 
     @staticmethod
@@ -320,7 +361,7 @@ class Tracer:
         reach: set[str] = set()
         for t in graph.turn_events(entry_turn):
             reach |= graph.descendants(t)
-        causal = reach & set(graph.ancestors(symptom))
+        causal = reach & graph.ancestor_set(symptom)
         attempts = 0
         drops: list[Override] = []
         for e in sorted(graph.events.values(), key=lambda e: e.seq):

@@ -93,3 +93,43 @@ def test_long_back_and_forth_stays_acyclic() -> None:
     assert g.is_acyclic()
     g.ancestors(events[-1].event_id)
     assert max(g.visits.values()) == 1
+
+
+# -- ISSUE-024 general rule: consequences are not entry points ------------------------------
+
+
+def test_select_entries_drops_same_agent_consequence() -> None:
+    """A reads a page, then (because of it) reads internal/policy.md in the same turn."""
+    from mastrace.analysis.tracer import select_entries
+
+    events = [
+        ev(1, EventKind.TASK_INPUT, "user", []),
+        ev(2, M, "agent:A", [1], "A#1"),
+        ev(3, X, "agent:A", [2], "A#1"),  # poisoned page
+        ev(4, M, "agent:A", [1, 2, 3], "A#1"),
+        ev(5, EventKind.TOOL_CALL, "agent:A", [4], "A#1"),  # read_file internal/policy.md
+        ev(6, M, "agent:A", [1, 2, 3, 4, 5], "A#1"),
+    ]
+    g = EventGraph(events)
+    assert select_entries(g, ["r:000005", "r:000003"]) == ["r:000003"]
+    assert select_entries(g, ["r:000003"]) == ["r:000003"]
+
+
+def test_select_entries_drops_downstream_memory_read() -> None:
+    from mastrace.analysis.tracer import select_entries
+
+    events = [
+        ev(1, EventKind.TASK_INPUT, "user", []),
+        ev(2, M, "agent:A", [1], "A#1"),
+        ev(3, X, "agent:A", [2], "A#1"),
+        ev(4, M, "agent:A", [1, 2, 3], "A#1"),
+        ev(5, MSG, "agent:A", [4], receivers=["B"]),
+        ev(6, M, "agent:B", [5], "B#1"),
+        ev(7, EventKind.MEMORY_READ, "agent:B", [6], "B#1"),
+        ev(8, X, "agent:B", [6], "B#1"),
+    ]
+    g = EventGraph(events)
+    # B's memory read descends from A's page: a consequence. Independent entries survive.
+    assert select_entries(g, ["r:000007", "r:000003"]) == ["r:000003"]
+    independent = EventGraph([*events[:4], ev(9, X, "agent:B", [1], "B#1")])
+    assert select_entries(independent, ["r:000003", "r:000009"]) == ["r:000003", "r:000009"]
