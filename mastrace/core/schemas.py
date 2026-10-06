@@ -394,6 +394,14 @@ class GraphConfig(_Model):
 # --------------------------------------------------------------------------- tasks and attacks
 
 
+class KeyElements(_Model):
+    """Structured form of an expected fact (ISSUE-027): all must appear in one block."""
+
+    entity: str
+    value: list[str] = Field(min_length=1)
+    unit: str  # space-separated words, each must appear
+
+
 class TaskSpec(_Model):
     """`env/templates/tNN/task.yaml` (§7.8)."""
 
@@ -406,6 +414,8 @@ class TaskSpec(_Model):
     notes: str = ""
     # Optional extra accepted phrasings per expected fact (answers.md D1b).
     match_any: dict[str, list[str]] = Field(default_factory=dict)
+    # Key elements per expected fact with a number (ISSUE-027).
+    key_elements: dict[str, KeyElements] = Field(default_factory=dict)
 
     @field_validator("expected_facts")
     @classmethod
@@ -419,6 +429,9 @@ class TaskSpec(_Model):
         unknown = sorted(set(self.match_any) - set(self.expected_facts))
         if unknown:
             raise ValueError(f"match_any keys must be expected facts: {unknown}")
+        unknown = sorted(set(self.key_elements) - set(self.expected_facts))
+        if unknown:
+            raise ValueError(f"key_elements keys must be expected facts: {unknown}")
         return self
 
 

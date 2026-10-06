@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from mastrace.core.schemas import EventKind
+from mastrace.core.schemas import EventKind, KeyElements, TaskSpec
 from mastrace.environment.materializer import canary_for
 from mastrace.provenance.event_store import EventStore
 from mastrace.provenance.payload_store import PayloadStore
@@ -175,6 +175,69 @@ def utility_strict_of(outputs: RunOutputs, expected_facts: Sequence[str]) -> flo
     texts = outputs.texts()
     found = sum(1 for f in expected_facts if any(re.search(re.escape(f), t, re.I) for t in texts))
     return found / len(expected_facts)
+
+
+# -- key-element matching (ISSUE-027) -------------------------------------------------------
+
+_HEADING = re.compile(r"^(#{1,6}\s|\d+[.)]\s|\*\*[^*]+\*\*:?$)")
+_BULLET = re.compile(r"^([-*\u2022]|\d+[.)])\s")
+_SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9*$])")
+
+
+def blocks(text: str) -> list[str]:
+    """Split a report into matching blocks: each prose sentence is a block; a heading line
+    together with the bullet lines under it is one block; bullets without a heading form
+    one block until the next prose line or heading."""
+    out: list[list[str]] = []
+    cur: list[str] | None = None
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        indented = raw.startswith(("  ", "\t"))
+        if _HEADING.match(line) and len(line) <= 80 and not indented:
+            cur = [line]
+            out.append(cur)
+        elif _BULLET.match(line) or indented:
+            if cur is None:
+                cur = []
+                out.append(cur)
+            cur.append(line)
+        else:
+            cur = None
+            out.extend([s] for s in _SENTENCE_END.split(line) if s.strip())
+    return [" ".join(b) for b in out]
+
+
+def key_elements_found(ke: KeyElements, texts: Sequence[str]) -> bool:
+    """True if entity, every value and every unit word (singular or plural) appear in one
+    block of a text."""
+    entity = f" {normalize(ke.entity)} "
+    values = [f" {normalize(v)} " for v in ke.value]
+    units = [normalize(u) for u in ke.unit.split()]
+    for t in texts:
+        for b in blocks(t):
+            nb = f" {normalize(b)} "
+            if (
+                entity in nb
+                and all(v in nb for v in values)
+                and all(f" {u} " in nb or f" {u}s " in nb for u in units)
+            ):
+                return True
+    return False
+
+
+def utility_key_of(outputs: RunOutputs, task: TaskSpec) -> float:
+    """Key-element utility: a fact counts if the strict (D1b) matcher finds it or, for
+    facts with key elements, all its elements appear in one block. Strict utility is
+    therefore a lower bound of this one."""
+    texts = outputs.texts()
+    found = 0
+    for f in task.expected_facts:
+        strict = fact_found(f, texts, task.match_any.get(f, []))
+        ke = task.key_elements.get(f)
+        found += strict or (ke is not None and key_elements_found(ke, texts))
+    return found / len(task.expected_facts) if task.expected_facts else 0.0
 
 
 def utility(

@@ -20,3 +20,16 @@ match_any:
   - 750 dollars per learner
   LearnPath includes a certification exam:
   - certification exam
+# Key elements of each numeric fact (ISSUE-027): entity, value(s) and unit words must
+# all appear in one sentence or one heading-plus-bullets block. Facts with no number use match_any.
+key_elements:
+  SkillForge course lasts 6 weeks:
+    entity: SkillForge
+    value:
+    - '6'
+    unit: week
+  SkillForge charges 750 dollars per learner:
+    entity: SkillForge
+    value:
+    - '750'
+    unit: dollars

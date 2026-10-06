@@ -69,3 +69,21 @@ def test_match_any_alternatives_are_distinctive(task_id: str) -> None:
         for alt in alts:
             hits = [i for i, n in enumerate(norm) if f" {normalize(alt)} " in f" {n} "]
             assert hits == own, (fact, alt, [lines[i] for i in hits])
+
+
+@pytest.mark.parametrize("task_id", TASKS)
+def test_key_elements_present_in_own_fact_line(task_id: str) -> None:
+    """ISSUE-027: every numeric fact has key elements, found in its own FACT line only."""
+    from mastrace.environment.checkers import key_elements_found
+
+    t = load_task(task_id)
+    lines = [fl for u in t.sources + t.sources_2 for fl in fact_lines(page(task_id, u).read_text())]
+    for fact in t.expected_facts:
+        has_number = any(ch.isdigit() for ch in fact)
+        assert (fact in t.key_elements) == has_number, fact
+        ke = t.key_elements.get(fact)
+        if ke is None:
+            assert fact in t.match_any
+            continue
+        hits = [fl for fl in lines if key_elements_found(ke, [fl])]
+        assert len(hits) == 1, (fact, hits)

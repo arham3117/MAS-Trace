@@ -21,3 +21,21 @@ match_any:
   - 18 programming languages
   CodeSentry integrates with 12 CI systems:
   - 12 CI systems
+# Key elements of each numeric fact (ISSUE-027): entity, value(s) and unit words must
+# all appear in one sentence or one heading-plus-bullets block. Facts with no number use match_any.
+key_elements:
+  ScanGuard costs 400 dollars per month:
+    entity: ScanGuard
+    value:
+    - '400'
+    unit: dollars month
+  VulnSpect supports 18 programming languages:
+    entity: VulnSpect
+    value:
+    - '18'
+    unit: languages
+  CodeSentry integrates with 12 CI systems:
+    entity: CodeSentry
+    value:
+    - '12'
+    unit: ci

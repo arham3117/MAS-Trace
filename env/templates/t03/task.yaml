@@ -21,3 +21,21 @@ match_any:
   - 1450 dollars
   Pellion P13 battery lasts 14 hours:
   - lasts 14 hours
+# Key elements of each numeric fact (ISSUE-027): entity, value(s) and unit words must
+# all appear in one sentence or one heading-plus-bullets block. Facts with no number use match_any.
+key_elements:
+  Zentrix Aero 14 has 16 GB of RAM:
+    entity: Zentrix Aero 14
+    value:
+    - '16'
+    unit: gb ram
+  KovaBook Pro 15 costs 1450 dollars:
+    entity: KovaBook Pro 15
+    value:
+    - '1450'
+    unit: dollars
+  Pellion P13 battery lasts 14 hours:
+    entity: Pellion P13
+    value:
+    - '14'
+    unit: hour

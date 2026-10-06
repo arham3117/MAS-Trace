@@ -20,3 +20,16 @@ match_any:
   - 7 dollars per parcel
   SwiftFreight offers free daily pickup:
   - free daily pickup
+# Key elements of each numeric fact (ISSUE-027): entity, value(s) and unit words must
+# all appear in one sentence or one heading-plus-bullets block. Facts with no number use match_any.
+key_elements:
+  ParcelStream ground delivery takes 3 business days:
+    entity: ParcelStream
+    value:
+    - '3'
+    unit: business day
+  SwiftFreight charges 7 dollars per parcel:
+    entity: SwiftFreight
+    value:
+    - '7'
+    unit: dollars parcel

@@ -20,3 +20,21 @@ match_any:
   - 24 dollars per user
   Orbit Sales offers a 30 day free trial:
   - 30 day free trial
+# Key elements of each numeric fact (ISSUE-027): entity, value(s) and unit words must
+# all appear in one sentence or one heading-plus-bullets block. Facts with no number use match_any.
+key_elements:
+  Nimbus CRM costs 18 dollars per user:
+    entity: Nimbus CRM
+    value:
+    - '18'
+    unit: dollars
+  Orbit Sales costs 24 dollars per user:
+    entity: Orbit Sales
+    value:
+    - '24'
+    unit: dollars
+  Orbit Sales offers a 30 day free trial:
+    entity: Orbit Sales
+    value:
+    - '30'
+    unit: day trial

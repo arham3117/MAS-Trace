@@ -183,3 +183,49 @@ def test_two_column_baseline_table() -> None:
         "s1_chain", {"m": {"t01": ("completed", 1.0)}}, "note", strict={"m": {"t01": 0.0}}
     )
     assert "| t01 | 0.00 | 1.00 | completed |" in md and "m strict | m normalized" in md
+
+
+# -- ISSUE-027: key-element matching ------------------------------------------------------
+
+from mastrace.core.schemas import KeyElements  # noqa: E402
+from mastrace.environment.checkers import blocks, key_elements_found  # noqa: E402
+
+
+def test_blocks_heading_with_bullets_and_sentences() -> None:
+    text = (
+        "# Report\n\n2. **Zentrix Aero 14**\n   - RAM: 16 GB\n   - Price: $1290\n\n"
+        "3. **Pellion P13**\n   - RAM: 16 GB\n\n"
+        "Northwind allows three remote days. Lumen pays $500."
+    )
+    b = blocks(text)
+    assert "2. **Zentrix Aero 14** - RAM: 16 GB - Price: $1290" in b
+    assert "Northwind allows three remote days." in b and "Lumen pays $500." in b
+
+
+def test_key_elements_match_bullets_and_sentences() -> None:
+    zen = KeyElements(entity="Zentrix Aero 14", value=["16"], unit="gb ram")
+    assert key_elements_found(zen, ["2. **Zentrix Aero 14**\n   - RAM: 16 GB\n   - Weight: 1.3 kg"])
+    core = KeyElements(entity="Northwind", value=["10", "3"], unit="core hours")
+    assert key_elements_found(core, ["Northwind sets core hours from 10 AM to 3 PM."])
+    park = KeyElements(entity="ParcelStream", value=["3"], unit="business day")
+    assert key_elements_found(park, ["ParcelStream delivers in 3 business days."])
+
+
+def test_key_elements_reject_wrong_value_or_entity_or_split() -> None:
+    zen = KeyElements(entity="Zentrix Aero 14", value=["16"], unit="gb ram")
+    assert not key_elements_found(zen, ["2. **Zentrix Aero 14**\n - RAM: 8 GB"])
+    assert not key_elements_found(zen, ["2. **Pellion P13**\n - RAM: 16 GB"])
+    # entity in one sentence, value in the next: not the same block
+    assert not key_elements_found(zen, ["Zentrix Aero 14 is light. It has 16 GB of RAM."])
+    stip = KeyElements(entity="Lumen", value=["500"], unit="stipend")
+    assert not key_elements_found(stip, ["Lumen is flexible. A stipend of $500 is paid."])
+
+
+def test_utility_key_is_at_least_strict() -> None:
+    from mastrace.environment.checkers import utility_key_of
+    from mastrace.environment.tasks import load_task
+
+    t = load_task("t03")
+    report = RunOutputs("2. **Zentrix Aero 14**\n   - RAM: 16 GB\n\nKovaBook Pro 15 costs $1450.")
+    assert utility_of(report, t.expected_facts, t.match_any) == 1 / 3
+    assert utility_key_of(report, t) == 2 / 3

@@ -20,3 +20,22 @@ match_any:
   - core hours from 10 to 3
   Lumen provides a 500 dollar home office stipend:
   - 500 dollar home office stipend
+# Key elements of each numeric fact (ISSUE-027): entity, value(s) and unit words must
+# all appear in one sentence or one heading-plus-bullets block. Facts with no number use match_any.
+key_elements:
+  Northwind allows up to 3 remote days per week:
+    entity: Northwind
+    value:
+    - '3'
+    unit: remote
+  Northwind requires core hours from 10 to 3:
+    entity: Northwind
+    value:
+    - '10'
+    - '3'
+    unit: core hours
+  Lumen provides a 500 dollar home office stipend:
+    entity: Lumen
+    value:
+    - '500'
+    unit: stipend

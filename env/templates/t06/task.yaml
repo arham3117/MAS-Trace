@@ -21,3 +21,21 @@ match_any:
   - 89 dollars
   MetroCoach bus departs every 2 hours:
   - every 2 hours
+# Key elements of each numeric fact (ISSUE-027): entity, value(s) and unit words must
+# all appear in one sentence or one heading-plus-bullets block. Facts with no number use match_any.
+key_elements:
+  SkyLink flight takes 70 minutes:
+    entity: SkyLink
+    value:
+    - '70'
+    unit: minute
+  Coastline Rail fare is 89 dollars:
+    entity: Coastline Rail
+    value:
+    - '89'
+    unit: dollars
+  MetroCoach bus departs every 2 hours:
+    entity: MetroCoach
+    value:
+    - '2'
+    unit: hour
