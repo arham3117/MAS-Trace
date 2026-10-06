@@ -824,10 +824,10 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 10: Stage 2 (two-way links)
 
-- [ ] **P10.1 Two-way behaviour.**
+- [x] **P10.1 Two-way behaviour.** (5b6f33e)
   - **Do:** Make sure the two-way prompt line (§7.8) and the scripted feedback behaviour (§7.13) work. Make sure per-direction limits and budgets end every run.
   - **Acceptance:** all `s2_*` configs finish with `completed` or `stopped_*`, never `crashed`, across 10 tasks with scripted runs.
-- [ ] **P10.2 Tracer on loops.**
+- [x] **P10.2 Tracer on loops.** (5b6f33e)
   - **Do:** Make sure ancestor traversal and path extraction work on long back-and-forth conversations. Add a stress test with 3 or more messages per direction.
   - **Acceptance:** the tracer finishes, visits each event at most once, and the entry turn is still `A#1`.
 - [ ] **P10.3 Stage 2 gate.**
@@ -836,10 +836,10 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
 
 ### Phase 11: Stage 3 (mixed links)
 
-- [ ] **P11.1 Multi-path tracing.**
+- [x] **P11.1 Multi-path tracing.** (98c1be3)
   - **Do:** The tracer returns every simple path from the entry turn to the symptom, up to 5. For each path, it replays with a `drop_message` override on that path's distinguishing edge (§7.11 step 7). The path is marked `causal` if the symptom disappears, `non_causal` if it doesn't, and `inseparable` if there is no distinguishing edge.
   - **Acceptance:** on `s3_mixed_two_paths`, both paths A→B→C→E and A→B→D→E are returned. The causal mark matches the scripted setup: make one path carry the payload by giving C the `resistant` policy and D the `gullible` one (per-agent policy overrides in scripted mode).
-- [ ] **P11.2 Multiple causes.**
+- [x] **P11.2 Multiple causes.** (94262c4)
   - **Do:** Make sure `confirmed_entry_events` can hold several events, and that the scorer compares sets.
   - **Acceptance:** a synthetic double-injection test (two poisoned pages, read by A and B) confirms both.
 - [ ] **P11.3 Stage 3 gate.**
@@ -1042,6 +1042,10 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · D1b · 2143de0 · normalized fact matching (NFKC, dashes, currency, plural units, word-bounded) + task.yaml match_any
 - 2026-10-05 · D1c · a348e60 · handoff_style prompt sets in prompts/handoff/<style>/ (choice: directories); summary default; no-relay-instruction test
 - 2026-10-05 · D1d/D1f/D1g · b141c1d · propagation by hop (anchor + 5-gram), (task,seed) gate sampling, G2 fallback
+- 2026-10-05 · P10.1 · 5b6f33e · plain code (answers.md D7): acceptance = gate check G2-1 (all s2 configs x 10 tasks, no crash), 20/20 PASS; re-run 94262c4
+- 2026-10-05 · P10.2 · 5b6f33e · plain code (D7): acceptance = G2-2 stress (4 msgs/direction, feedback_rounds 3), tracer finishes, each event visited once, entry A#1, 5/5 PASS
+- 2026-10-05 · P11.1 · 98c1be3 · plain code (D7): stage-3 path tests by distinguishing edge; G3-1 both paths 5/5, G3-2 causal path with C resistant 5/5; Stage 3 metrics wait for D6
+- 2026-10-05 · P11.2 · 94262c4 · candidate pairs confirm independent causes; scorer compares entry sets; derived-candidate rule (ISSUE-024)
 
 ---
 
