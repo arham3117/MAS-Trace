@@ -268,3 +268,39 @@ replays. A full real-model gate check can take 1–2 hours of local compute (no 
 - **Open questions for the team:**
   1. **ISSUE-025:** which truth definition for Stage 3 paths? Options 1–3 above; my recommendation is option 3, reporting both, because "carried" and "necessary" answer different questions.
   2. **D3:** is A→C→E being causal on the whiteboard layout what the team intended?
+
+---
+
+## Update 2026-10-05 (later): team follow-ups applied
+
+- **ISSUE-025 resolved:** three path labels.
+  - *carried* (anchors), *sufficient* (keep-only replay) and *necessary* (drop replay).
+  - Validation, carried vs sufficient: **35/35 = 100%** on 20 scripted Stage 3 runs.
+  - 5/20 runs are overdetermined.
+  - The scorer reports: path precision/recall against carried (the main metric), necessary precision/recall, an overdetermined flag, per-path responsibility 1/m (Chockler & Halpern 2004), and the tracer's marks against both label sets.
+  - When no path is necessary, the tracer runs keep-only replays and marks each path necessary / redundant / non_causal / inseparable. Its marks agree **100%** with both carried and necessary on the 20 runs.
+  - Report: `reports/results/d6_path_validation.md`. ISSUE-014 and ISSUE-020 are resolved too.
+- **ISSUE-024 generalized:** a confirmed candidate that descends from another confirmed candidate is a consequence; the entry is the most upstream one. New tests use a same-turn `read_file` of policy.md and a downstream `memory_read`.
+- **D3 follow-up:**
+  - The answers.md D3 sentence is replaced with the team's explanation.
+  - `s3_whiteboard` scripted gate checks run with C resistant.
+  - Later G1 leaks are recorded as additional symptom events, and the first leak stays primary. On the gullible whiteboard run the operator leaks twice.
+- **P12.1 done:** the AI investigator.
+  - No tools; `untrusted_data` wrapping, with escaped closing tags.
+  - It only orders replays; verdicts are still confirmed by replay.
+  - `investigator_fooled` is recorded; its calls go to a separate signed analysis log.
+  - `mastrace trace --investigator`.
+- **P12.2 done:** respond.
+  - A containment replay: the router quarantines the entry turn (ISSUE-026, because the plan's single-replay wording contradicts its own acceptance criterion).
+  - A healing replay with the entry neutralized.
+  - All 7 configs, stages 1–3: contained, recovered (no D1/D2), utility ≥ 2/3.
+- **Utility checks:**
+  - The baseline table now shows strict utility (dev_open **7%**) next to normalized utility (**53%**).
+  - Hand check of 20 reports: **50/60 = 83%** agreement. All 10 misses are checker false negatives, and there are no false positives. ISSUE-027 logs it with options; report: `reports/baselines/utility_handcheck.md`.
+- **New finding, ISSUE-028:** seeds 1 and 2 give byte-identical dev_open runs at temperature 0. So D1g's t01–t10 × {1, 2} sampling is really 10 distinct runs, each run twice.
+- **Stage 1 gate (new rule):** still running.
+  - G-C4 dev_open: PASS 5/5.
+  - G1-1: the G1 attack (`g1s0`) landed in **0/20** sampled runs, and attacker content never left agent A.
+  - The G2 fallback is running. The **first landing attack** is `s1_chain-t02-g2s0`: attacker content reached every hop and the final output.
+  - G1-2 (fan-in) follows. Results will be added when the gate finishes.
+- **Open questions for the team:** ISSUE-026 (confirm the P12.2 reading), ISSUE-027 (checker options), ISSUE-028 (sampling rule).
