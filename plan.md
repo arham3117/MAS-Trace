@@ -1049,6 +1049,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · D1e · efc64e4 · clean baseline (summary, plain): dev_open 53%, scripted 100% (ISSUE-023 resolved)
 - 2026-10-05 · D6 · be650f3 · anchor true_paths merged; validation necessity 57% (stop, ISSUE-025), sufficiency 100%; labels not used in reports
 - 2026-10-05 · ISSUE-025 · 21f27b8 · three path labels; carried vs sufficient 100%; tracer marks necessary/redundant; consequence rule general (ISSUE-024)
+- 2026-10-05 · D3 follow-up · c46eff3 · whiteboard explanation; scripted checks C resistant; additional symptom events
 
 ---
 

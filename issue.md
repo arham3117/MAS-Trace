@@ -509,6 +509,8 @@ Layout: A→B, A↔C, B↔C, B→D, D→E, C→E. A researcher, B analyst, C pla
 - Commit: 792fc5c
 - Fix: Provisional; the team may revise it before Phase 13. The layout from answers.md D3 is in configs/graphs/s3_whiteboard.yaml. Observation for the team: with every scripted agent gullible, the payload reaches E first over the shorter route A→C→E, so that is the causal path. Only with C resistant is A→B→D→E causal (and the tracer marks A→C→E non_causal).
 - Regression test: tests/integration/test_tracer.py::test_whiteboard_attack_and_trace, tests/unit/test_graph_config.py
+
+**Note (2026-10-05): team confirmed** that A→C→E being causal under all-gullible is expected. The answers.md D3 sentence was replaced with the explanation. s3_whiteboard scripted gate checks now use C resistant (tests/gates/harness.py SCRIPTED_POLICY). Later G1 leaks are recorded as additional symptom events (ResolvedGT.additional_symptoms, symptom_oracle.symptom_events), and the first leak stays primary. Commit c46eff3; test tests/integration/test_detection.py::test_later_leaks_are_additional_symptoms.
 ---
 
 ## ISSUE-018: D4: opaque run_uid inside events
