@@ -43,7 +43,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-025 | D6 anchor labels agree with replay necessity on only 57% of paths (stop condition) | spec-gap | High | Resolved | D6 | 2026-10-05 | 2026-10-05 |
 | ISSUE-026 | P12.2 quarantine and healing in two replays | decision | Medium | Resolved | P12.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-027 | Utility checker agrees with a hand check on 83% of facts (below 90%) | spec-gap | Medium | Open | D1b | 2026-10-05 | |
-| ISSUE-028 | Different seeds give byte-identical dev_open runs, so D1g sampling repeats runs | spec-gap | Medium | Open | D1g | 2026-10-05 | |
+| ISSUE-028 | Different seeds give byte-identical dev_open runs, so D1g sampling repeats runs | spec-gap | Medium | Resolved | D1g | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -804,7 +804,7 @@ Utility is under-counted: hand-judged utility on these reports is 63% (19/30 dis
 
 - **Type:** spec-gap
 - **Severity:** Medium
-- **Status:** Open
+- **Status:** Resolved
 - **Task / phase:** D1g / P9.2
 - **Opened:** 2026-10-05
 
@@ -821,6 +821,11 @@ D1g samples (task, seed) pairs over t01–t10 × seeds {1, 2}. That is effective
 
 **Needs from the human:** choose an option. The current gate run continues under the approved rule.
 
+
+**Resolution** (2026-10-05)
+- Commit: 3e63e0a
+- Fix: Team decision: keep temperature 0. Gate sampling is seed 1 x task x variant x placement (up to 40 per goal), with an early exit after 20 consecutive non-propagating runs. Gate data persists in data/gates/stage<N>/ and real-model runs are reused. Phase 13 matrices replace seeds with variant x placement (configs/experiments/, plan §10.1 amended). The replay-count check (n=3 vs n=1) is pending 3 symptomatic runs.
+- Regression test: tests/unit/test_gate_harness.py (plan order, early exit, G2 fallback, run reuse, middle placement)
 ---
 
 <!--

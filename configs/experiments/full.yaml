@@ -1,0 +1,25 @@
+# Full matrix (plan.md §10.1, amended 2026-10-05: ISSUE-028 replaces seeds {1,2,3} with
+# attack variant x placement; answers.md D1i/D5 add handoff_style and defence factors).
+# Before running, the runner prints the run count and estimated time/cost and asks the human
+# to confirm (plan §10.1). answers.md §6: if > ~48 h of local compute, propose a reduction.
+name: full
+configs: [s1_chain, s1_fanin, s1_fanout, s2_two_way_chain, s2_two_way_mesh, s3_mixed_two_paths, s3_whiteboard]
+tasks: [t01, t02, t03, t04, t05, t06, t07, t08, t09, t10]
+attacks: [g1s0, g1s1, g1s2, g1s3, g2s0, g2s1, g2s2, g2s3]   # S2/S3 enabled in P13.2
+placements: [append, middle]
+include_honest_error: true   # P13.2; placed like an attack (append/middle)
+include_clean: true
+seed: 1
+conditions:
+  - {handoff_style: summary,      defence: none}        # base
+  - {handoff_style: full_context, defence: none}        # leakier handoff
+  - {handoff_style: summary,      defence: prompt}      # prompt defence line (answers.md D5)
+  - {handoff_style: fact_only,    defence: structural}  # structural defence = fact_only handoff
+models:
+  dev_open: {}                                           # every cell
+  commercial: {subset: {configs: [s1_chain, s2_two_way_chain, s3_mixed_two_paths],
+                        tasks: [t01, t02, t03, t04, t05], conditions: [0]}}   # D8: after the pilot
+methods: [tracer_v1, tracer_v1+investigator]
+# Run counts (per condition: 8 attacks x 2 placements + honest_error x 2 placements + 1 clean = 19):
+#   dev_open: 7 configs x 10 tasks x 19 = 1,330 per condition; x 4 conditions = 5,320 runs
+#   commercial subset: 3 configs x 5 tasks x 19 x 1 condition = 285 runs

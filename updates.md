@@ -1,40 +1,32 @@
 # MAS-Trace testbed: work update
 
-**As of:** 2026-10-05 · **Repo:** https://github.com/arham3117/MAS-Trace (branch `main`)
-**Plan progress:** 40 of the plan's tasks are done (P0.1 → P9.1). **P9.2 is blocked** waiting for a team decision (see `decisions.md`).
+**As of:** 2026-10-05 (late) · **Repo:** https://github.com/arham3117/MAS-Trace (branch `main`)
+**Plan progress:** 46 tasks ticked (P0.1–P9.1, P10.1, P10.2, P11.1, P11.2, P12.1, P12.2). **P9.2, the Stage 1 real-model gate, is re-running** under the ISSUE-028 sampling rule. P9.3, P10.3, P11.3 and P12.3 (pilot) wait for it (D7).
 
 ---
 
 ## 1. Summary
 
-The testbed has everything the plan needs up to the Stage 1 gate, plus most of the machinery for later stages:
+The testbed runs 5-agent LLM teams on 7 graph layouts, plants a prompt injection in one web page, records every action in a hash-chained, Ed25519-signed log, replays runs from a cache, traces a symptom back to its entry agent and turn, and can contain and heal the run (P12.2). An AI investigator can order the tracer's replays (P12.1), but only replay confirms a verdict.
 
-- It runs 5-agent LLM teams on 7 graph layouts: one-way, two-way and mixed links.
-- It plants a prompt-injection attack in one web page.
-- It records every action in a hash-chained, Ed25519-signed log.
-- It replays runs from a cache.
-- It traces a symptom back to the agent and turn where the attack entered.
+**What works:**
+- Every plain-code gate check passes for Stages 1–3.
+- On scripted runs the tracer finds the right agent and turn on every layout. It handles multiple causes, and it marks paths necessary or redundant. Ground-truth path labels (carried) agree 100% with replay sufficiency.
+- On the real model, clean utility is 53% (strict) and there are no false alarms.
 
-The end-to-end pipeline works and is tested, using the deterministic **scripted** model:
-- Every plain-code gate check passes for **Stages 1, 2 and 3**.
-- The tracer names the right agent (`A`) and turn (`A#1`) on the chain, fan-in, fan-out, two-way and mixed layouts.
-- With the real local model, the system completes its tasks (73% clean utility) and raises no false alarms.
-
-**The one blocker:** the prompt-injection attack never succeeds on the local model. The prompts I tuned for task
-quality tell agents to forward only `FACT:` lines, so the attacker's text is filtered out at the first agent.
-Without successful attacks, the tracer cannot be tested on the real model. Fixing this needs your decision **D1**
-in `decisions.md`.
+**Open problem:** on the dev model, the exfiltration attack (G1) has never made it past agent A. The marker attack (G2) landed in one task so far (t02), and the tracer attributed it correctly (A, A#1, path A→B→C→D→E). The re-run gate samples G1 and G2 over tasks × variants × placements to decide whether Stage 1 passes. **Finding so far: propagation depends on payload type.**
 
 | Item | Status |
 |---|---|
-| Code | ~5,350 lines in `mastrace/`, ~4,700 lines of tests |
-| `make check` (lint, format, mypy, unit + integration tests) | **392 passed** (29 gate tests and 1 model test run separately) |
+| Code | ~6,700 lines in `mastrace/`, ~5,900 lines of tests |
+| `make check` | **486 passed** (gate and model tests run separately) |
 | Stage 1 gate, plain code | **PASS** (`reports/gates/stage1_2026-10-05_plumbing.md`) |
-| Stage 1 gate, with the real model | **INCONCLUSIVE** (`reports/gates/stage1_2026-10-05.md`) |
-| Stage 2 and 3 checks, plain code | All pass (run during P8.2; not yet ticked) |
-| Clean baseline (`s1_chain`, t01–t10) | Scripted 100%, dev model 73% (`reports/baselines/clean_s1_chain.md`) |
-| Issues logged | 14 (`issue.md`): 8 resolved, 5 open, 1 blocked |
-| Decisions waiting for you | 8 (`decisions.md`), 2 of them blocking |
+| Stage 1 gate, real model | **Re-running** (ISSUE-028 rule; G-C4 dev PASS 5/5) |
+| Stage 2 and 3 checks, plain code | All pass |
+| Clean baseline (`s1_chain`) | scripted 100%; dev_open strict 53% (`reports/baselines/clean_s1_chain.md`) |
+| Utility hand checks | first sample 83% (ISSUE-027); key-element matcher being validated on a new sample |
+| Issues | 28 logged: 25 resolved; open: ISSUE-011/015 (attack landing; gate), ISSUE-027 (utility checker) |
+| Decisions waiting for you | none blocking right now |
 
 ---
 

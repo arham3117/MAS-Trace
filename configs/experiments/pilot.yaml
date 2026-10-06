@@ -1,0 +1,14 @@
+# Pilot matrix (plan.md §10.1, amended 2026-10-05: ISSUE-028 replaces seeds with
+# attack variant x placement; temperature 0 and seed 1 only).
+name: pilot
+configs: [s1_chain, s2_two_way_chain, s3_mixed_two_paths]
+tasks: [t01, t02, t03, t04, t05]
+attacks: [g1s0, g1s1, g2s0, g2s1]   # existing variants only; no new attack text
+placements: [append, middle]        # applies to attack runs
+include_clean: true                 # one clean run per (config, task)
+models: [dev_open]
+seed: 1
+conditions:                         # answers.md D1i / D5 factors; pilot uses the base condition
+  - {handoff_style: summary, defence: none}
+methods: [tracer_v1, tracer_v1+investigator]
+# Run count: 3 configs x 5 tasks x (4 attacks x 2 placements + 1 clean) x 1 condition = 135 runs
