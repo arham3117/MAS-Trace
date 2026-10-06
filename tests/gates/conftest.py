@@ -10,8 +10,16 @@ from tests.gates.harness import Lab
 
 
 @pytest.fixture(scope="session")
-def lab(tmp_path_factory: pytest.TempPathFactory) -> Lab:
-    from mastrace.settings import Settings
+def lab() -> Lab:
+    """Gate data lives in `data/gates/stage<N>/` (or `MASTRACE_GATE_DATA`), so real-model
+    runs, their cache and verdicts survive between gate sessions (ISSUE-028)."""
+    import os
 
-    root: Path = tmp_path_factory.mktemp("gate")
-    return Lab(Settings(data_dir=root / "data"))
+    from mastrace.settings import REPO_ROOT, Settings
+    from tests.gates.harness import gate_stage
+
+    root = Path(
+        os.environ.get("MASTRACE_GATE_DATA")
+        or REPO_ROOT / "data" / "gates" / f"stage{gate_stage()}"
+    )
+    return Lab(Settings(data_dir=root))

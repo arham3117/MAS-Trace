@@ -24,13 +24,23 @@ def run_with_attack(
     settings: Settings | None = None,
     allow_disabled: bool = False,
     target_agent: str = "A",
+    placement: str | None = None,
     **kwargs: Any,
 ) -> RunResult:
-    """Run one configuration; for attack runs, poison the target page first."""
+    """Run one configuration; for attack runs, poison the target page first.
+
+    `placement` overrides the attack spec's placement (ISSUE-028 sampling); a non-default
+    placement is part of the run's attack label (`g1s0@middle`), while ground truth keeps
+    the real attack ID.
+    """
     settings = settings or get_settings()
     hook = None
+    label = attack_id
     if attack_id is not None:
         spec = load_attack(attack_id, allow_disabled=allow_disabled)
+        if placement is not None and placement != spec.placement:
+            spec = spec.model_copy(update={"placement": placement})
+            label = f"{attack_id}@{placement}"
 
         def hook(env_dir: Path, task: TaskSpec, run_id: str) -> None:
             inject(env_dir, task, spec, run_id, settings.ground_truth_path, target_agent)
@@ -38,7 +48,7 @@ def run_with_attack(
     return run_once(
         config,
         task_id,
-        attack_id,
+        label,
         model_key,
         seed,
         mode=mode,

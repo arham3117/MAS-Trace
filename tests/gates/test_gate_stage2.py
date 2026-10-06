@@ -60,7 +60,7 @@ def test_g2_2_tracer_finishes_on_long_conversations(
     for t, s in SCRIPTED_RUNS:
         r = lab.run(stress_config(), t, "g1s0", "scripted_gullible", s, feedback_rounds=3)
         graphs.clear()
-        v = lab.trace(r)
+        v = lab.trace(r, reuse=False)
         per_dir = max(e.link["count"] for e in lab.events(r) if e.link)
         traversed = [g for g in graphs if g.visits]
         once = bool(traversed) and all(max(g.visits.values()) == 1 for g in traversed)
