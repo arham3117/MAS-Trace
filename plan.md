@@ -1041,6 +1041,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · D1a · 8b54183 · page_render fact_prefixed|plain (plain default for litellm), in manifest and snapshot hash
 - 2026-10-05 · D1b · 2143de0 · normalized fact matching (NFKC, dashes, currency, plural units, word-bounded) + task.yaml match_any
 - 2026-10-05 · D1c · a348e60 · handoff_style prompt sets in prompts/handoff/<style>/ (choice: directories); summary default; no-relay-instruction test
+- 2026-10-05 · D1d/D1f/D1g · b141c1d · propagation by hop (anchor + 5-gram), (task,seed) gate sampling, G2 fallback
 
 ---
 

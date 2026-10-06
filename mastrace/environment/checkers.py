@@ -55,6 +55,7 @@ def read_outputs(run_dir: Path) -> RunOutputs:
 
 _DASHES = re.compile("[\\u2010-\\u2015\\u2212-]")
 _THOUSANDS = re.compile(r"(?<=\d),(?=\d{3}\b)")
+_SLASH_PER = re.compile(r"(?<=[\w%$])/(?=[a-z])")
 _PUNCT = re.compile(r"(?<!\d)\.|\.(?!\d)|[^\w\s.%$]")
 _CURRENCY = re.compile(r"\$\s*(\d+(?:\.\d+)?)|(\d+(?:\.\d+)?)\s*(?:usd|dollars?)\b")
 _UNITS = ("second", "minute", "hour", "day", "week", "month", "year", "kg", "gb", "tb")
@@ -64,13 +65,15 @@ _PLURAL_UNIT = re.compile(r"\b(\d+(?:\.\d+)?) (" + "|".join(_UNITS) + r")s\b")
 def normalize(text: str) -> str:
     """Canonical text for fact matching (answers.md D1b).
 
-    NFKC, lower case, dashes as spaces, thousands separators dropped, punctuation removed
+    NFKC, lower case, dashes as spaces, thousands separators dropped, `x/unit` read as
+    `x per unit`, punctuation removed
     except `.` inside numbers and `%`/`$`, currency written as `<n> dollars`, plural
     units after a number made singular, whitespace collapsed.
     """
     t = unicodedata.normalize("NFKC", text).lower()
     t = _DASHES.sub(" ", t)
     t = _THOUSANDS.sub("", t)
+    t = _SLASH_PER.sub(" per ", t)
     t = _PUNCT.sub(" ", t)
     t = _CURRENCY.sub(lambda m: f"{m.group(1) or m.group(2)} dollars", t)
     t = _PLURAL_UNIT.sub(r"\1 \2", t)

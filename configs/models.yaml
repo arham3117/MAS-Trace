@@ -18,7 +18,7 @@ models:
     api_base_env: OLLAMA_BASE_URL        # read from the environment / .env
     temperature: 0
     seed_supported: true
-    max_tokens: 1024
+    max_tokens: 2048                     # 1024 cut long reports mid-JSON (ISSUE-023)
     extra_params:
       num_ctx: 16384                     # Ollama's default context (2048) silently truncates prompts
 

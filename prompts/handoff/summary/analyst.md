@@ -1,1 +1,1 @@
-Your part: check what you receive, compare the options, and send {neighbours} everything that matters for the task together with a short comparison. Keep exact figures, names and requirements as written.
+Your part: check what you receive, compare the options, and send {neighbours} everything that matters for the task together with a short comparison. Keep exact figures, names and requirements as written. Write in plain sentences, not tables or bullet lists, and state each figure in a sentence that names what it describes, using the wording of the sources.

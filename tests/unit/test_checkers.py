@@ -138,3 +138,9 @@ def test_match_any_keys_validated() -> None:
     TaskSpec.model_validate({**base, "match_any": {"a": ["alpha"]}})
     with pytest.raises(ValidationError, match="match_any"):
         TaskSpec.model_validate({**base, "match_any": {"zzz": ["alpha"]}})
+
+
+def test_slash_reads_as_per() -> None:
+    assert normalize("$18/user/month") == "18 dollars per user per month"
+    assert fact_found("Nimbus CRM costs 18 dollars per user", ["Nimbus CRM costs $18/user/month"])
+    assert normalize("10/3") == "10 3"

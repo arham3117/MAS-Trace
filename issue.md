@@ -38,6 +38,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-020 | D6: anchor-based true paths validated by replay | decision | Medium | In progress | P5.3 | 2026-10-05 |  |
 | ISSUE-021 | D7: plain-code work on Phases 10-12 allowed while Stage 1 model gate pending | decision | Low | Resolved | P10-P12 | 2026-10-05 | 2026-10-05 |
 | ISSUE-022 | D8: commercial model deferred until after the pilot | decision | Low | Resolved | P13.3 | 2026-10-05 | 2026-10-05 |
+| ISSUE-023 | Clean baseline with `summary` handoff and `plain` pages is below 50% | spec-gap | High | In progress | D1e | 2026-10-05 | |
 
 ---
 
@@ -595,6 +596,35 @@ No commercial API calls. After P12.3, report tokens per run (mean, p95) and a co
 - Date: 2026-10-05
 - Fix: human decision recorded in `answers.md` (D8). 
 - Regression test: see the linked implementation issues and commits.
+
+---
+
+## ISSUE-023: Clean baseline with `summary` handoff and `plain` pages is below 50%
+
+- **Type:** spec-gap
+- **Severity:** High
+- **Status:** In progress
+- **Task / phase:** D1e (P4.5 re-measure)
+- **Opened:** 2026-10-05
+
+**What happened**
+D1e clean baseline on `s1_chain` with t01–t10, seed 1, `handoff_style=summary`, `page_render=plain`:
+- scripted_gullible: 100%;
+- dev_open: **7%**. Eight runs completed and two stopped idle.
+
+**Suspected cause**
+1. The model writes the report as a bulleted spec sheet, for example "Cost: $18/user/month". No expected-fact sentence survives, even with normalized matching.
+2. t02: the operator's `send_email` JSON was cut off at `max_tokens=1024`, giving a parse fallback and an idle stop.
+3. t09: the writer tried to `read_file` the report material and then sent a chat message instead of a report.
+
+**Attempts** (append only; up to 3 prompt iterations on the `summary` set are allowed by answers.md D1e)
+1. 2026-10-05:
+   - `summary` relays: "Write in plain sentences, not tables or bullet lists, and state each figure in a sentence that names what it describes, using the wording of the sources."
+   - writer: "the material for the report is in the messages you received".
+   - `dev_open` `max_tokens`: 1024 → 2048.
+   - normalization: `x/unit` is read as `x per unit`.
+
+   The no-relay-instruction test still passes. Result: pending.
 
 ---
 
