@@ -41,6 +41,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-023 | Clean baseline with `summary` handoff and `plain` pages is below 50% | spec-gap | High | Resolved | D1e | 2026-10-05 | 2026-10-05 |
 | ISSUE-024 | Tracer confirmed a downstream secret read as the entry event | bug | High | Resolved | P11.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-025 | D6 anchor labels agree with replay necessity on only 57% of paths (stop condition) | spec-gap | High | Resolved | D6 | 2026-10-05 | 2026-10-05 |
+| ISSUE-026 | P12.2 quarantine and healing in two replays | decision | Medium | Resolved | P12.2 | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -725,6 +726,41 @@ The answers.md comparison against "necessary" used the wrong reference under red
 - Commit: 21f27b8
 - Fix: Three labels per path: carried (anchor), sufficient (keep-only replay), necessary (drop replay). Validation carried vs sufficient = 35/35 (100%) on 20 scripted Stage 3 runs; 5/20 runs are overdetermined. The tracer marks paths necessary / redundant / non_causal / inseparable; on the same runs its marks agree 100% with both carried and necessary. Path precision/recall against carried is the main metric; necessary, overdetermined and responsibility 1/m are reported separately.
 - Regression test: tests/integration/test_path_validation.py, tests/unit/test_scorer.py::test_overdetermined_redundant_marks, ::test_single_necessary_path, tests/integration/test_tracer.py::test_overdetermined_paths_marked_redundant
+---
+
+## ISSUE-026: P12.2 quarantine and healing in two replays
+
+- **Type:** decision
+- **Severity:** Medium
+- **Status:** Resolved
+- **Task / phase:** P12.2
+- **Opened:** 2026-10-05
+
+**What happened**
+P12.2 says respond quarantines the entry agent "for a healing replay": stop that agent's outgoing messages for the poisoned turn, and revoke its tools for that turn. The acceptance criterion is a healed run with no D1/D2 alerts and utility ≥ 2/3. Doing both in one replay is contradictory. The entry agent is usually the researcher (A), so blocking its poisoned turn also blocks every legitimate fact, and utility would be 0.
+
+**Decision**
+`respond()` runs two replays of the attacked run:
+1. **Containment.** The router quarantines (agent, turn) of the entry:
+   - it records a `quarantine` event (scope `turn`; the original run's symptom and the verdict ID go in `meta`, because they are cross-run references);
+   - it rejects the turn's outgoing messages with reason `quarantined`;
+   - the tool gateway denies the turn's tool calls.
+2. **Healing.** The confirmed entry events are neutralized with `tool_output` overrides, and nothing is quarantined.
+
+The heal record (`<run>/heal.jsonl`) holds:
+- `contained` and `recovered` (no D1/D2 alerts in the containment / healing replay);
+- utility before, contained and after;
+- the extra tokens.
+
+Quarantine remains router-only (I3).
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: `mastrace/analysis/respond.py`, `Router.quarantine_turn`, `ToolGateway.revoke_turn`, and `run_once` / `replay` `quarantine=`.
+- Regression test: `tests/integration/test_respond.py`. All 7 configs pass, across stages 1–3: contained, recovered, utility_after ≥ 2/3.
+
+**Needs from the human:** confirm this reading of P12.2.
+
 ---
 
 <!--

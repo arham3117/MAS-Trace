@@ -7,6 +7,7 @@ component that applies quarantine (I3).
 
 from __future__ import annotations
 
+import re
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from typing import Literal
@@ -49,6 +50,12 @@ class OutgoingMessage:
     order: int  # position within the sender's turn
 
 
+def _turn_of(ref: str) -> int | None:
+    """Turn number of a `local:<agent>#<n>:<k>` reference (None for other refs)."""
+    m = re.match(r"local:[A-Za-z0-9_]+#(\d+):", ref)
+    return int(m.group(1)) if m else None
+
+
 class Router:
     """Inboxes, link checks, per-direction limits, quarantine and termination."""
 
@@ -66,6 +73,7 @@ class Router:
         self.accepted: dict[tuple[str, str], int] = {}
         self.attempts: dict[tuple[str, str], int] = {}
         self.quarantined: set[str] = set()
+        self.quarantined_turns: set[tuple[str, int]] = set()
         self._drops = {
             (o.from_, o.to, o.nth) for o in overrides if isinstance(o, DropMessageOverride)
         }
@@ -96,6 +104,8 @@ class Router:
         if m.to not in self.inboxes or not self.cfg.allows(m.sender, m.to):
             return "no_link"
         if m.sender in self.quarantined or m.to in self.quarantined:
+            return "quarantined"
+        if (m.sender, _turn_of(m.built_from)) in self.quarantined_turns:
             return "quarantined"
         if (m.sender, m.to, nth) in self._drops:
             return "dropped"
@@ -165,6 +175,31 @@ class Router:
                 receivers=[agent_id],
                 built_from=[symptom_event_id],
                 meta={"verdict_id": verdict_id, "agent": agent_id},
+            )
+        )
+
+    def quarantine_turn(
+        self, agent_id: str, turn: int, superstep: int, verdict_id: str, symptom_event_id: str
+    ) -> EventRecord:
+        """Quarantine one turn of an agent (P12.2): its outgoing messages are rejected.
+
+        Tool revocation for the same turn is applied by the tool gateway. The symptom lives
+        in the original run, so it is referenced in `meta`, not `built_from`.
+        """
+        self.quarantined_turns.add((agent_id, turn))
+        return self.recorder.record_now(
+            EventDraft(
+                kind=EventKind.QUARANTINE,
+                actor="router",
+                superstep=superstep,
+                receivers=[agent_id],
+                meta={
+                    "agent": agent_id,
+                    "turn": turn,
+                    "verdict_id": verdict_id,
+                    "symptom_event_id": symptom_event_id,
+                    "scope": "turn",
+                },
             )
         )
 

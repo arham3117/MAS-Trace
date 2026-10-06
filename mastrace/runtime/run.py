@@ -20,6 +20,7 @@ from mastrace.core.schemas import (
     HandoffStyle,
     Override,
     PageRender,
+    QuarantineRequest,
     RunManifest,
     TaskSpec,
 )
@@ -103,6 +104,7 @@ def run_once(
     run_uid: str | None = None,
     handoff_style: HandoffStyle = "summary",
     page_render: PageRender | None = None,
+    quarantine: Sequence[QuarantineRequest] = (),
 ) -> RunResult:
     """Run one configuration end to end and verify its log.
 
@@ -153,6 +155,7 @@ def run_once(
         handoff_style=handoff_style,
         page_render=page_render,
         model_digest=model_digest,
+        quarantine=list(quarantine),
         config_name=cfg.name,
         config_hash=cfg_hash,
         config=cfg.model_dump(mode="json"),
@@ -241,6 +244,9 @@ def run_once(
             )
         )
         router.put_task(agent_id, ev.event_id, body)
+    for q in quarantine:  # only the router applies quarantine (I3)
+        router.quarantine_turn(q.agent, q.turn, 0, q.verdict_id, q.symptom_event_id)
+        tool_gw.revoke_turn(q.agent, q.turn)
 
     # -- run ---------------------------------------------------------------------
     status, supersteps, error = "crashed", 0, None

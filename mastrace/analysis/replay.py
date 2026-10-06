@@ -13,7 +13,7 @@ from collections.abc import Sequence
 from typing import cast
 
 from mastrace.core.ids import replay_uid
-from mastrace.core.schemas import GraphConfig, Override
+from mastrace.core.schemas import GraphConfig, Override, QuarantineRequest
 from mastrace.mediation.providers.scripted import Policy
 from mastrace.runtime.run import read_manifest, run_once
 from mastrace.settings import Settings, get_settings
@@ -34,6 +34,7 @@ def replay(
     overrides: Sequence[Override] = (),
     n: int = 1,
     settings: Settings | None = None,
+    quarantine: Sequence[QuarantineRequest] = (),
 ) -> list[str]:
     """Replay `run_id` `n` times with `overrides`; return the replay run IDs
     (`<run_id>__r<k>`, numbered after any existing replays).
@@ -67,6 +68,7 @@ def replay(
             run_uid=replay_uid(m.run_uid, k),
             handoff_style=m.handoff_style,
             page_render=m.page_render,
+            quarantine=quarantine,
         )
         out.append(rid)
     return out

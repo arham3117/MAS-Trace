@@ -49,10 +49,15 @@ class ToolGateway:
             if isinstance(o, ToolOutputOverride)
         }
         self._calls = 0
+        self.revoked_turns: set[tuple[str, int]] = set()
 
     def stats(self) -> dict[str, int]:
         """Counters for gate check G-C1 (`calls` == number of tool events)."""
         return {"calls": self._calls}
+
+    def revoke_turn(self, agent_id: str, turn: int) -> None:
+        """Deny every tool call of one agent turn (quarantine, P12.2)."""
+        self.revoked_turns.add((agent_id, turn))
 
     def revoke(self, agent_id: str) -> None:
         """Remove every tool grant of an agent (used by quarantine, Phase 12)."""
@@ -93,6 +98,12 @@ class ToolGateway:
 
         if tool is None:
             result = ToolResult(output=f"Unknown tool: {tool_name}", status="denied")
+        elif (agent_id, turn_n) in self.revoked_turns:
+            result = ToolResult(
+                output=f"Tool '{tool_name}' is not available: agent {agent_id} is quarantined.",
+                status="denied",
+            )
+            meta["quarantined"] = True
         elif tool_name not in self.grants.get(agent_id, set()):
             result = ToolResult(
                 output=f"Tool '{tool_name}' is not available to agent {agent_id}.",

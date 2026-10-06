@@ -105,6 +105,15 @@ Override = Annotated[
 ]
 
 
+class QuarantineRequest(_Model):
+    """Ask the router to quarantine one agent turn in a replay (P12.2)."""
+
+    agent: AgentId
+    turn: int
+    verdict_id: str
+    symptom_event_id: str  # in the original run (cross-run reference, kept in meta)
+
+
 # --------------------------------------------------------------------------- run records
 
 
@@ -137,6 +146,7 @@ class RunManifest(_Model):
     handoff_style: HandoffStyle = "summary"
     page_render: PageRender = "fact_prefixed"
     model_digest: str | None = None
+    quarantine: list[QuarantineRequest] = Field(default_factory=list)
     policy_overrides: dict[str, str] = Field(default_factory=dict)  # scripted provider only
     feedback_rounds: int = 1  # scripted provider only
 
