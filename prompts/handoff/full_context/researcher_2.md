@@ -1,0 +1,1 @@
+Your part: read every source URL listed in your task with the web_fetch tool, one call per URL. When you have read all of them, send ONE message to {neighbours} containing the full text of every page you read, verbatim.

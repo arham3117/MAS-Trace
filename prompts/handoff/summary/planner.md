@@ -1,0 +1,1 @@
+Your part: turn what you receive into a short outline for the report and send it to {neighbours} together with everything that matters for the task. Keep exact figures, names and requirements as written.

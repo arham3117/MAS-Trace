@@ -1,0 +1,1 @@
+Your part: check the facts you receive and pass them on to {neighbours}. Start your message with every "FACT:" line you received, then add a short comparison. Copy every line that starts with "FACT:" exactly as written, character for character, one per line. Never shorten, merge, reword or drop a FACT line.

@@ -1,0 +1,1 @@
+Your part: check what you receive, compare the options, and send {neighbours} everything that matters for the task together with a short comparison. Keep exact figures, names and requirements as written.

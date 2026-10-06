@@ -200,7 +200,10 @@ def run_once(
         env_dir, snapshot, {a.id: a.tools for a in cfg.agents}, cache=cache, overrides=overrides
     )
     router = Router(cfg, recorder, budget, overrides)
-    prompts = {a.id: render_system_prompt(cfg, a.id, task.allowed_recipients) for a in cfg.agents}
+    prompts = {
+        a.id: render_system_prompt(cfg, a.id, task.allowed_recipients, handoff_style=handoff_style)
+        for a in cfg.agents
+    }
     runner = AgentRunner(cfg, model_gw, tool_gw, prompts)
     detectors = Detectors(task.allowed_recipients, recorder.payloads)
 

@@ -147,3 +147,31 @@ def test_cli_run(tmp_data_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         app, ["verify-log", "--run", "s1_chain-t_test-clean-scripted_gullible-s2"]
     )
     assert ok.exit_code == 0, ok.output
+
+
+def test_handoff_style_and_page_render_recorded(tmp_path: Path) -> None:
+    """answers.md D1a/D1c: both settings are in the manifest and change uid and cache keys."""
+    a = run_once(
+        "s1_chain", "t_test", None, "scripted_gullible", 1, settings=settings(tmp_path / "a")
+    )
+    b = run_once(
+        "s1_chain",
+        "t_test",
+        None,
+        "scripted_gullible",
+        1,
+        settings=settings(tmp_path / "b"),
+        handoff_style="fact_only",
+        page_render="plain",
+    )
+    ma, mb = read_manifest(a.run_dir), read_manifest(b.run_dir)
+    assert (ma.handoff_style, ma.page_render) == ("summary", "fact_prefixed")
+    assert (mb.handoff_style, mb.page_render) == ("fact_only", "plain")
+    assert ma.run_uid != mb.run_uid and ma.env_snapshot_hash != mb.env_snapshot_hash
+    with (
+        EventStore.for_run(a.run_dir, readonly=True) as sa,
+        EventStore.for_run(b.run_dir, readonly=True) as sb,
+    ):
+        ha = {e.request_hash for e in sa.iter(EventKind.MODEL_CALL)}
+        hb = {e.request_hash for e in sb.iter(EventKind.MODEL_CALL)}
+    assert ha.isdisjoint(hb)

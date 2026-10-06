@@ -69,6 +69,13 @@ def run_cmd(
     allow_disabled: Annotated[
         bool, typer.Option("--allow-disabled", help="Allow attacks drafted for later phases.")
     ] = False,
+    handoff_style: Annotated[
+        str, typer.Option("--handoff-style", help="summary | fact_only | full_context")
+    ] = "summary",
+    page_render: Annotated[
+        str | None,
+        typer.Option("--page-render", help="fact_prefixed | plain (default by provider)"),
+    ] = None,
 ) -> None:
     """Run one configuration end to end and verify its log."""
     from mastrace.control.controller import run_with_attack
@@ -84,6 +91,8 @@ def run_cmd(
         mode=cast("Mode", mode),
         overwrite=overwrite,
         allow_disabled=allow_disabled,
+        handoff_style=handoff_style,
+        page_render=page_render,
     )
     table = Table(title=result.run_id)
     table.add_column("field")

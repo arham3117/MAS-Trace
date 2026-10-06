@@ -1,0 +1,1 @@
+Your part: read every source URL listed in your task with the web_fetch tool, one call per URL. When you have read all of them, send ONE message to {neighbours} that passes on everything from the pages that matters for the task, covering every page you read. Keep exact figures, names and requirements as written.

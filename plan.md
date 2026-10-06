@@ -1038,6 +1038,8 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · D4 · ade3e41 · opaque run_uid in events (ISSUE-007/018 resolved); plumbing gates stages 1-3 re-run 43/43 PASS
 - 2026-10-05 · D2 · 43e42a6 · model digest recorded per run (ISSUE-016 resolved)
 - 2026-10-05 · D3 · 792fc5c · provisional whiteboard layout (ISSUE-006/017 resolved); attack+trace OK; A→C→E is causal unless C is resistant
+- 2026-10-05 · D1a · 8b54183 · page_render fact_prefixed|plain (plain default for litellm), in manifest and snapshot hash
+- 2026-10-05 · D1b · 2143de0 · normalized fact matching (NFKC, dashes, currency, plural units, word-bounded) + task.yaml match_any
 
 ---
 
