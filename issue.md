@@ -29,18 +29,18 @@ Rules are in `plan.md` §0.3:
 | ISSUE-011 | Attack does not land on dev model | gate-failure | High | In progress | P9.2 | 2026-10-05 |  |
 | ISSUE-012 | Role prompts carry no prompt-injection defence | decision | Medium | Resolved | P4.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-013 | Tracing the same run twice crashed on a duplicate verdict ID | bug | Medium | Resolved | P8.2 | 2026-10-05 | 2026-10-05 |
-| ISSUE-014 | Ground-truth "true paths" use `built_from` causality, which over-approximates | spec-gap | Medium | Open | P5.3 | 2026-10-05 | |
+| ISSUE-014 | Ground-truth "true paths" use `built_from` causality, which over-approximates | spec-gap | Medium | Resolved | P5.3 | 2026-10-05 | 2026-10-05 |
 | ISSUE-015 | D1: make attacks land with a neutral handoff, plain pages and normalized utility | decision | High | In progress | P9.2 | 2026-10-05 |  |
 | ISSUE-016 | D2: confirm dev_open model and record its digest | decision | Low | Resolved | P9.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-017 | D3: provisional s3_whiteboard layout | decision | Low | Resolved | P3.1 | 2026-10-05 | 2026-10-05 |
 | ISSUE-018 | D4: opaque run_uid inside events | decision | Medium | Resolved | P5.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-019 | D5: undefended baseline; defence becomes a Phase 13 factor | decision | Low | Resolved | P4.2 | 2026-10-05 | 2026-10-05 |
-| ISSUE-020 | D6: anchor-based true paths validated by replay | decision | Medium | In progress | P5.3 | 2026-10-05 |  |
+| ISSUE-020 | D6: anchor-based true paths validated by replay | decision | Medium | Resolved | P5.3 | 2026-10-05 | 2026-10-05 |
 | ISSUE-021 | D7: plain-code work on Phases 10-12 allowed while Stage 1 model gate pending | decision | Low | Resolved | P10-P12 | 2026-10-05 | 2026-10-05 |
 | ISSUE-022 | D8: commercial model deferred until after the pilot | decision | Low | Resolved | P13.3 | 2026-10-05 | 2026-10-05 |
 | ISSUE-023 | Clean baseline with `summary` handoff and `plain` pages is below 50% | spec-gap | High | Resolved | D1e | 2026-10-05 | 2026-10-05 |
 | ISSUE-024 | Tracer confirmed a downstream secret read as the entry event | bug | High | Resolved | P11.2 | 2026-10-05 | 2026-10-05 |
-| ISSUE-025 | D6 anchor labels agree with replay necessity on only 57% of paths (stop condition) | spec-gap | High | Blocked | D6 | 2026-10-05 | |
+| ISSUE-025 | D6 anchor labels agree with replay necessity on only 57% of paths (stop condition) | spec-gap | High | Resolved | D6 | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -416,7 +416,7 @@ Call `Tracer.trace(run_id, symptom, check)` twice on one run.
 
 - **Type:** spec-gap
 - **Severity:** Medium
-- **Status:** Open
+- **Status:** Resolved
 - **Task / phase:** P5.3 (matters for P11.1 and P13)
 - **Opened:** 2026-10-05
 
@@ -440,6 +440,11 @@ The tracer's path tests (distinguishing-edge drops) do get this right: G3-2 pass
 
 
 **Note (2026-10-05):** Human decision D6 (answers.md; ISSUE-020): anchor-based true paths validated by replay.
+
+**Resolution** (2026-10-05)
+- Commit: 21f27b8
+- Fix: true_paths is now anchor-based ('carried'), validated against sufficiency (ISSUE-025); the old built_from paths remain as causal_paths.
+- Regression test: tests/integration/test_injection.py::test_anchor_paths_exclude_paths_that_dropped_the_payload
 ---
 
 ## ISSUE-015: D1: make attacks land with a neutral handoff, plain pages and normalized utility
@@ -551,7 +556,7 @@ Prompts stay undefended for development and gates. Phase 13 adds a defence facto
 
 - **Type:** decision
 - **Severity:** Medium
-- **Status:** In progress
+- **Status:** Resolved
 - **Task / phase:** P5.3
 - **Opened:** 2026-10-05
 
@@ -563,6 +568,11 @@ A path is true if every message on it, and the symptom, contains an anchor (G1: 
 - Fix: human decision recorded in `answers.md` (D6). 
 - Regression test: see the linked implementation issues and commits.
 
+
+**Resolution** (2026-10-05)
+- Commit: 21f27b8
+- Fix: Implemented with the three-label refinement decided for ISSUE-025.
+- Regression test: see ISSUE-025
 ---
 
 ## ISSUE-021: D7: plain-code work on Phases 10-12 allowed while Stage 1 model gate pending
@@ -667,13 +677,15 @@ Under §7.11 step 3, internal reads are entry candidates. In G1 runs, the operat
 - Fix: a candidate is **derived** if another top candidate reaches it through at least one message event. Confirmed non-derived candidates win. If none confirm, the tracer tries pairs of non-derived candidates (independent causes). A's reads of its own task sources are not derived, because no message lies between them.
 - Regression test: `tests/integration/test_tracer.py::test_downstream_secret_read_is_not_the_entry`, `tests/integration/test_multi_cause.py::test_double_injection_confirms_both`
 
+
+**Note (2026-10-05): generalized per human request.** Rule: a confirmed candidate that descends from another confirmed candidate is a consequence, and the entry is the most upstream confirmed candidate (`select_entries`). The message-based "derived" rule is kept only to decide when to try candidate pairs (independent causes). Regression tests: `tests/unit/test_event_graph.py::test_select_entries_drops_same_agent_consequence` (a `read_file` of policy.md in the same turn) and `::test_select_entries_drops_downstream_memory_read`.
 ---
 
 ## ISSUE-025: D6 anchor labels agree with replay necessity on only 57% of paths (stop condition)
 
 - **Type:** spec-gap
 - **Severity:** High
-- **Status:** Blocked
+- **Status:** Resolved
 - **Task / phase:** D6 (answers.md §6 stop condition)
 - **Opened:** 2026-10-05
 
@@ -706,6 +718,11 @@ Report both, using three labels per path:
 - **necessary**: a drop replay removes the symptom.
 
 The answers.md comparison against "necessary" used the wrong reference under redundancy. Validation now compares carried with sufficient, and the bar stays 90%.
+
+**Resolution** (2026-10-05)
+- Commit: 21f27b8
+- Fix: Three labels per path: carried (anchor), sufficient (keep-only replay), necessary (drop replay). Validation carried vs sufficient = 35/35 (100%) on 20 scripted Stage 3 runs; 5/20 runs are overdetermined. The tracer marks paths necessary / redundant / non_causal / inseparable; on the same runs its marks agree 100% with both carried and necessary. Path precision/recall against carried is the main metric; necessary, overdetermined and responsibility 1/m are reported separately.
+- Regression test: tests/integration/test_path_validation.py, tests/unit/test_scorer.py::test_overdetermined_redundant_marks, ::test_single_necessary_path, tests/integration/test_tracer.py::test_overdetermined_paths_marked_redundant
 ---
 
 <!--
