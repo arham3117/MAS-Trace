@@ -152,7 +152,9 @@ def trace_cmd(
     for col in ("kind", "target", "replays", "symptom present", "result"):
         reps.add_column(col)
     for r in verdict.replays:
-        target = r.get("candidate") or "→".join(r.get("path", []))
+        target = (
+            r.get("candidate") or "+".join(r.get("candidates", [])) or "→".join(r.get("path", []))
+        )
         result = str(r.get("confirmed", r.get("status")))
         reps.add_row(
             r["kind"],

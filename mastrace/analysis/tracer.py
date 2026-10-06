@@ -5,10 +5,11 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from itertools import pairwise
+from itertools import combinations, pairwise
 from pathlib import Path
 from typing import Any
 
+import networkx as nx
 import yaml
 
 from mastrace.analysis.detectors import Detectors
@@ -106,15 +107,9 @@ class Tracer:
 
         replays: list[dict[str, Any]] = []
         confirmed: list[str] = []
-        for cand in ranking[: self.cfg.top_k]:
-            e = graph.events[cand["candidate"]]
-            agent, turn = parse_turn_id(str(e.turn_id))
-            override = ToolOutputOverride(
-                agent=agent,
-                turn=turn,
-                call_index=int(e.call_index or 0),
-                replacement=self.cfg.neutral,
-            )
+        top = [graph.events[c["candidate"]] for c in ranking[: self.cfg.top_k]]
+        for e in top:
+            override = self._neutralize(e)
             ids, present = self._replay(run_id, [override], n, symptom_check)
             ok = sum(present) * 2 < len(present)  # symptom gone in the majority
             replays.append(
@@ -129,6 +124,34 @@ class Tracer:
             )
             if ok:
                 confirmed.append(e.event_id)
+        # An entry point is where attacker content came in from outside. A candidate whose
+        # request was caused by content another candidate sent through a message (e.g. the
+        # operator reading credentials.txt because a relayed note told it to) is "derived":
+        # neutralizing it also removes the symptom, but it is downstream of the entry.
+        derived = {e.event_id for e in top if self._derived(graph, e, top)}
+        upstream = [c for c in confirmed if c not in derived]
+        if upstream:
+            confirmed = upstream
+        else:
+            # P11.2: independent causes. Neutralizing one entry leaves the other, so try
+            # pairs of non-derived candidates; a pair that removes the symptom confirms both.
+            for a, b in combinations([e for e in top if e.event_id not in derived], 2):
+                overrides = [self._neutralize(a), self._neutralize(b)]
+                ids, present = self._replay(run_id, overrides, n, symptom_check)
+                ok = sum(present) * 2 < len(present)
+                replays.append(
+                    {
+                        "kind": "candidate_set",
+                        "candidates": [a.event_id, b.event_id],
+                        "overrides": [o.model_dump(mode="json") for o in overrides],
+                        "replay_run_ids": ids,
+                        "symptom_present": present,
+                        "confirmed": ok,
+                    }
+                )
+                if ok:
+                    confirmed = [a.event_id, b.event_id]
+                    break
 
         with EventStore.for_run(run_dir, readonly=True) as store:
             k = len(store.verdicts()) + 1
@@ -208,6 +231,25 @@ class Tracer:
             )
         rows.sort(key=lambda r: (-r["score"], -r["depth"], r["seq"]))
         return rows
+
+    @staticmethod
+    def _derived(graph: EventGraph, e: EventRecord, others: Sequence[EventRecord]) -> bool:
+        """True if another candidate reaches `e` through at least one message event."""
+        anc = nx.ancestors(graph.g, e.event_id)
+        messages = [m for m in anc if graph.events[m].kind == EventKind.MESSAGE]
+        for other in others:
+            if other.event_id == e.event_id or other.event_id not in anc:
+                continue
+            reach = nx.descendants(graph.g, other.event_id)
+            if any(m in reach for m in messages):
+                return True
+        return False
+
+    def _neutralize(self, e: EventRecord) -> ToolOutputOverride:
+        agent, turn = parse_turn_id(str(e.turn_id))
+        return ToolOutputOverride(
+            agent=agent, turn=turn, call_index=int(e.call_index or 0), replacement=self.cfg.neutral
+        )
 
     def _replay(
         self, run_id: str, overrides: Sequence[Override], n: int, check: SymptomCheck

@@ -21,6 +21,7 @@ COLUMNS = [
     "agent_correct",
     "step_correct",
     "entry_event_correct",
+    "entry_set_correct",
     "path_precision",
     "path_recall",
     "wrong_blame",
@@ -64,11 +65,13 @@ def score(
             row["entry_event_correct"] = verdict.entry_event_id == resolved.entry_event
         else:
             row["entry_event_correct"] = False
+        row["entry_set_correct"] = set(verdict.confirmed_entry_events) == set(resolved.entry_events)
         v_edges, t_edges = edges(verdict.paths), edges(resolved.true_paths)
         row["path_precision"] = len(v_edges & t_edges) / len(v_edges) if v_edges else None
         row["path_recall"] = len(v_edges & t_edges) / len(t_edges) if t_edges else None
     else:
         row["entry_event_correct"] = False
+        row["entry_set_correct"] = False
     relays = {a for p in resolved.true_paths for a in p[1:]}
     row["wrong_blame"] = agent is not None and agent != gt.target_agent and agent in relays
     return row

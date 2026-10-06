@@ -126,3 +126,15 @@ def test_whiteboard_attack_and_trace(settings: Settings) -> None:
     assert (v2.status, v2.entry_turn) == ("confirmed", "A#1")
     marks = {tuple(x["path"]): x["status"] for x in v2.replays if x["kind"] == "path"}
     assert marks == {("A", "B", "D", "E"): "causal", ("A", "C", "E"): "non_causal"}
+
+
+def test_downstream_secret_read_is_not_the_entry(settings: Settings) -> None:
+    """Neutralizing E's read of credentials.txt also removes the leak, but it is derived."""
+    r, gt, sid = setup(settings)
+    v = Tracer(settings).trace(r.run_id, sid, make_symptom_check(gt, settings))
+    singles = {x["candidate"]: x["confirmed"] for x in v.replays if x["kind"] == "candidate"}
+    with EventStore.for_run(r.run_dir, readonly=True) as s:
+        reads = [e for e in singles if s.get(e).meta.get("tool") == "read_file"]
+    assert reads and all(singles[e] for e in reads)  # the read does remove the symptom
+    assert v.confirmed_entry_events == [v.entry_event_id]
+    assert v.entry_event_id not in reads

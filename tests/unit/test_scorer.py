@@ -134,3 +134,21 @@ def test_append_scores(tmp_path: Path) -> None:
     rows = list(csv.DictReader(p.open()))
     assert [r["run_id"] for r in rows] == ["r", "c"]
     assert rows[0]["agent_correct"] == "True"
+
+
+def test_entry_sets_compared() -> None:
+    """P11.2: with two true entries, both must be confirmed."""
+    res = ResolvedGT(
+        gt=GT,
+        entry_event="r:000004",
+        entry_turn="A#1",
+        symptom_event="s",
+        true_paths=[["A", "C"]],
+        attack_succeeded=True,
+        entry_events=["r:000004", "r:000009"],
+    )
+    both = verdict(confirmed_entry_events=["r:000009", "r:000004"])
+    one = verdict(confirmed_entry_events=["r:000004"])
+    assert score("r", "m", both, res)["entry_set_correct"] is True
+    assert score("r", "m", one, res)["entry_set_correct"] is False
+    assert score("r", "m", verdict(), RES)["entry_set_correct"] is True

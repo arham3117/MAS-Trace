@@ -39,6 +39,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-021 | D7: plain-code work on Phases 10-12 allowed while Stage 1 model gate pending | decision | Low | Resolved | P10-P12 | 2026-10-05 | 2026-10-05 |
 | ISSUE-022 | D8: commercial model deferred until after the pilot | decision | Low | Resolved | P13.3 | 2026-10-05 | 2026-10-05 |
 | ISSUE-023 | Clean baseline with `summary` handoff and `plain` pages is below 50% | spec-gap | High | In progress | D1e | 2026-10-05 | |
+| ISSUE-024 | Tracer confirmed a downstream secret read as the entry event | bug | High | Resolved | P11.2 | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -625,6 +626,34 @@ D1e clean baseline on `s1_chain` with t01–t10, seed 1, `handoff_style=summary`
    - normalization: `x/unit` is read as `x per unit`.
 
    The no-relay-instruction test still passes. Result: pending.
+
+---
+
+## ISSUE-024: Tracer confirmed a downstream secret read as the entry event
+
+- **Type:** bug
+- **Severity:** High
+- **Status:** Resolved
+- **Task / phase:** P11.2
+- **Opened:** 2026-10-05
+
+**What happened**
+Under §7.11 step 3, internal reads are entry candidates. In G1 runs, the operator's `read_file(credentials.txt)` therefore ranks in the top 3. Neutralizing it removes the leak, because there is no secret left to send, so it was "confirmed".
+- Single-injection runs: the true entry outranked it, so verdicts were right by luck. `confirmed_entry_events` wrongly contained the read too.
+- Double-injection run (P11.2): neither poisoned page confirms alone, so the read became the entry event, which is wrong blame on E.
+
+**How to reproduce**
+`tests/integration/test_multi_cause.py` before the fix.
+
+**Expected vs actual**
+- Expected: entry events are where attacker content came in.
+- Actual: a downstream effect of the attack was confirmed as its entry.
+
+**Resolution**
+- Date: 2026-10-05
+- Commit: see the P11.2 commit
+- Fix: a candidate is **derived** if another top candidate reaches it through at least one message event. Confirmed non-derived candidates win. If none confirm, the tracer tries pairs of non-derived candidates (independent causes). A's reads of its own task sources are not derived, because no message lies between them.
+- Regression test: `tests/integration/test_tracer.py::test_downstream_secret_read_is_not_the_entry`, `tests/integration/test_multi_cause.py::test_double_injection_confirms_both`
 
 ---
 

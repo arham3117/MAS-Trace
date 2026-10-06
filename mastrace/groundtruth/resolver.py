@@ -30,6 +30,11 @@ class ResolvedGT:
     symptom_event: str | None
     true_paths: list[list[str]] = field(default_factory=list)
     attack_succeeded: bool = False
+    entry_events: list[str] = field(default_factory=list)  # all entries (P11.2 multi-cause)
+
+    def __post_init__(self) -> None:
+        if not self.entry_events and self.entry_event:
+            self.entry_events = [self.entry_event]
 
 
 def find_symptom(
