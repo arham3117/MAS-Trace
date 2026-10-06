@@ -237,3 +237,34 @@ These are all recorded as `decision` issues. None of them changes a §2 fixed de
 
 **Time estimate for real-model gates.** A dev-model run takes ~1.5–2 minutes, and each symptomatic run adds up to 9
 replays. A full real-model gate check can take 1–2 hours of local compute (no API cost).
+
+---
+
+## Update 2026-10-05: answers.md applied (stopped at a §6 stop condition)
+
+- **Decisions recorded:** ISSUE-015 to ISSUE-022 (one per D1–D8). `decisions.md` answer lines filled in. Linked statuses updated: 002 note, 006, 007, 011, 012, 014.
+- **D4 opaque IDs:** done. Events use `run_uid` (`r_` + 16 hex); the readable `run_name` appears only in the directory and `manifest.json`. The strict GT test passes: it scans every event field, identifiers included, and every non-page payload. **Plumbing gates re-run: PASS (43/43, stages 1–3).** ISSUE-007 and ISSUE-018 resolved.
+- **D2:** the model digest is recorded per run (`7cdf5a01…`). ISSUE-016 resolved.
+- **D3:** the provisional whiteboard layout is in place. An attack run and trace complete. **Note for the team:** with every agent gullible, the leak arrives first over the shorter route A→C→E, so that is the causal path. The intended route A→B→D→E is causal only when C is resistant. ISSUE-006 and ISSUE-017 resolved (provisional).
+- **D1a–D1d:**
+  - `page_render` (`plain` for real models);
+  - normalized utility matching with `match_any` cores, each checked by a test to be distinctive within its task;
+  - `handoff_style` prompt sets (`summary` default, `fact_only` identical to the old prompts, `full_context`), with a test that no prompt tells agents to relay or obey instructions;
+  - per-hop propagation check (evaluation side);
+  - (task, seed) gate sampling and the G2 fallback.
+- **D1 baseline (summary, plain):** dev_open utility **53%** (scripted 100%). Prompt iterations used: **1 of 3**. Iteration 0 scored 7%; iteration 1 scored 43% with the first matcher, and 53% after adding number-word and unit-name forms (the same runs re-scored). ISSUE-023 resolved. Report: `reports/baselines/clean_s1_chain.md`.
+- **Stage 1 gate (new §9.3 rule):** **running in the background**; results will be appended here. G1-1 __/__ symptomatic, __/5 correct; G1-2 __/__, __/5.
+- **G2 fallback used:** pending (it depends on the gate).
+- **Propagation by hop (s1_chain, dev_open):** pending (it depends on the gate).
+- **D6 validation: agreement 57% on 20 runs (35 run–path pairs). This is a stop condition (ISSUE-025).**
+  - Anchor labels and replay *necessity* agree on every single-carrier run (C resistant), and disagree on every run where the payload travels redundant routes. Each route carried the attack, but none is necessary alone.
+  - Against replay *sufficiency*, agreement is **100%**.
+  - Anchor labels are merged as code but **not used in any report** until the team chooses: (1) validate against sufficiency, (2) use replay labels as truth, or (3) report "carried" and "necessary" as two metrics.
+  - Report: `reports/results/d6_path_validation.md`.
+- **D7 plain-code progress:**
+  - P10.1, P10.2 and P11.1 ticked: their acceptance is covered by the passing scripted gate checks G2-1, G2-2, G3-1 and G3-2.
+  - **P11.2 done.** Candidate pairs confirm independent causes, and the scorer compares entry sets. Found and fixed **ISSUE-024**: the tracer could confirm the operator's `credentials.txt` read (a downstream effect) as the entry. A "derived candidate" rule now prevents this.
+  - P10.3 and P11.3 are not ticked. P12.1 and P12.2 have not been started, because the stop condition paused new work.
+- **Open questions for the team:**
+  1. **ISSUE-025:** which truth definition for Stage 3 paths? Options 1–3 above; my recommendation is option 3, reporting both, because "carried" and "necessary" answer different questions.
+  2. **D3:** is A→C→E being causal on the whiteboard layout what the team intended?
