@@ -11,7 +11,10 @@ models:
 
   dev_open:
     provider: litellm
-    model: ollama_chat/qwen2.5:14b-instruct-q4_K_M   # installed locally; team to confirm (ISSUE-002)
+    # Team-confirmed dev model (answers.md D2). Ollama digest at confirmation (2026-10-05):
+    #   7cdf5a0187d5c58cc5d369b255592f7841d1c4696d45a8c8a9489440385b22f6
+    # Each run records the digest it actually used in manifest.json (model_digest).
+    model: ollama_chat/qwen2.5:14b-instruct-q4_K_M
     api_base_env: OLLAMA_BASE_URL        # read from the environment / .env
     temperature: 0
     seed_supported: true

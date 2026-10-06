@@ -1034,6 +1034,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P8.3 · 33013c6 · control/gates.py; `mastrace gate --stage N [--plumbing-only]`, `stage-status`, make gate
 - 2026-10-05 · P9.1 · 456c9c8 · stage 1 plumbing gate PASS (all common + G1-x scripted 5/5) at 9c4a657: reports/gates/stage1_2026-10-05_plumbing.md; no gate-failure issues
 - 2026-10-05 · P9.2 · 054c8e1 · stage 1 model gate INCONCLUSIVE: G-C4 dev 5/5, G1-1/G1-2 dev 0/15 symptomatic; ISSUE-011 blocked on human decision
+- 2026-10-05 · D4 · ade3e41 · opaque run_uid in events (ISSUE-007/018 resolved); plumbing gates stages 1-3 re-run 43/43 PASS
 
 ---
 

@@ -143,3 +143,49 @@ def test_import_makes_no_network_call() -> None:
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, env=env)
     assert out.returncode == 0, out.stdout + out.stderr
     assert out.stdout.strip() == "ok"
+
+
+def test_model_digest_from_ollama_tags(monkeypatch: pytest.MonkeyPatch) -> None:
+    import io
+    import json as _json
+    import urllib.request
+
+    seen: list[str] = []
+
+    def fake_urlopen(url: str, timeout: float) -> io.BytesIO:
+        seen.append(url)
+        body = {
+            "models": [
+                {"name": "other", "digest": "x"},
+                {"name": "qwen2.5:14b-instruct-q4_K_M", "digest": "abc123"},
+            ]
+        }
+        return io.BytesIO(_json.dumps(body).encode())
+
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://model-host.test:11434")
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    p = LiteLLMProvider(load_model("dev_open"), completion=lambda **kw: None)
+    assert p.model_digest() == "abc123"
+    assert seen == ["http://model-host.test:11434/api/tags"]
+
+
+def test_model_digest_unreachable_is_none(monkeypatch: pytest.MonkeyPatch) -> None:
+    import urllib.request
+
+    def boom(url: str, timeout: float) -> None:
+        raise OSError("down")
+
+    monkeypatch.setattr(urllib.request, "urlopen", boom)
+    assert (
+        LiteLLMProvider(load_model("dev_open"), completion=lambda **kw: None).model_digest() is None
+    )
+
+
+@pytest.mark.model
+def test_dev_model_digest_live() -> None:
+    if not _dev_model_reachable():
+        pytest.skip("dev_open model server not reachable")
+    p = make_provider(load_model("dev_open"))
+    assert p.model_digest() == (  # type: ignore[attr-defined]
+        "7cdf5a0187d5c58cc5d369b255592f7841d1c4696d45a8c8a9489440385b22f6"
+    )

@@ -144,11 +144,15 @@ def run_once(
         snapshot = env_snapshot_hash(env_dir)
 
     version = code_version()
+    provider = make_provider(model_cfg, policy_overrides, feedback_rounds)
+    digest_fn = getattr(provider, "model_digest", None)
+    model_digest = digest_fn() if callable(digest_fn) else None
     manifest = RunManifest(
         run_name=run_id,
         run_uid=run_uid,
         handoff_style=handoff_style,
         page_render=page_render,
+        model_digest=model_digest,
         config_name=cfg.name,
         config_hash=cfg_hash,
         config=cfg.model_dump(mode="json"),
@@ -181,7 +185,6 @@ def run_once(
     )
     budget = TokenBudget(cfg.limits.max_tokens_run)
     cache = ResponseCache(settings.cache_path)
-    provider = make_provider(model_cfg, policy_overrides, feedback_rounds)
     model_gw = ModelGateway(
         provider,
         cache,

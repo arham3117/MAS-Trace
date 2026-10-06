@@ -22,7 +22,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-004 | Recorder design: local refs, clock, signature bytes and tamper triggers | decision | Low | Resolved | P1.6 | 2026-10-05 | 2026-10-05 |
 | ISSUE-005 | Prompt/text contract and ScriptedProvider details | decision | Low | Resolved | P2.1 | 2026-10-05 | 2026-10-05 |
 | ISSUE-006 | `s3_whiteboard` layout is unknown | spec-gap | Medium | Open | P3.1 | 2026-10-05 | |
-| ISSUE-007 | Run IDs contain the attack ID, and every event ID contains the run ID | spec-gap | Low | Open | P5.2 | 2026-10-05 | |
+| ISSUE-007 | Run IDs contain the attack ID, and every event ID contains the run ID | spec-gap | Low | Resolved | P5.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-008 | The n=3 majority replays would be identical because of the shared cache | spec-gap | Medium | Resolved | P7.1 | 2026-10-05 | 2026-10-05 |
 | ISSUE-009 | `dev_open` clean utility is below 50% on `s1_chain` | spec-gap | High | Resolved | P4.5 | 2026-10-05 | 2026-10-05 |
 | ISSUE-010 | LiteLLM fetches its cost map from GitHub at import (network outside the gateways) | bug | High | Resolved | P9.2 | 2026-10-05 | 2026-10-05 |
@@ -33,7 +33,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-015 | D1: make attacks land with a neutral handoff, plain pages and normalized utility | decision | High | In progress | P9.2 | 2026-10-05 |  |
 | ISSUE-016 | D2: confirm dev_open model and record its digest | decision | Low | In progress | P9.2 | 2026-10-05 |  |
 | ISSUE-017 | D3: provisional s3_whiteboard layout | decision | Low | In progress | P3.1 | 2026-10-05 |  |
-| ISSUE-018 | D4: opaque run_uid inside events | decision | Medium | In progress | P5.2 | 2026-10-05 |  |
+| ISSUE-018 | D4: opaque run_uid inside events | decision | Medium | Resolved | P5.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-019 | D5: undefended baseline; defence becomes a Phase 13 factor | decision | Low | Resolved | P4.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-020 | D6: anchor-based true paths validated by replay | decision | Medium | In progress | P5.3 | 2026-10-05 |  |
 | ISSUE-021 | D7: plain-code work on Phases 10-12 allowed while Stage 1 model gate pending | decision | Low | Resolved | P10-P12 | 2026-10-05 | 2026-10-05 |
@@ -194,7 +194,7 @@ The placeholder is used. No gate check depends on `s3_whiteboard` specifically, 
 
 - **Type:** spec-gap
 - **Severity:** Low
-- **Status:** Open
+- **Status:** Resolved
 - **Task / phase:** P3.5 / P5.2
 - **Opened:** 2026-10-05
 
@@ -209,6 +209,11 @@ The placeholder is used. No gate check depends on `s3_whiteboard` specifically, 
 
 
 **Note (2026-10-05):** Human decision D4 (answers.md; ISSUE-018): opaque run_uid inside events; resolved once implemented.
+
+**Resolution** (2026-10-05)
+- Commit: ade3e41
+- Fix: Events use run_uid = r_ + sha256(run tuple)[:16], and replays derive theirs from the original. run_name (readable) lives only in the directory name and manifest.json. Plumbing gates re-run for stages 1-3: 43/43 PASS.
+- Regression test: tests/integration/test_injection.py::test_run_log_has_no_ground_truth, ::test_run_uid_is_deterministic_and_replays_differ
 ---
 
 ## ISSUE-008: The n=3 majority replays would be identical because of the shared cache
@@ -487,7 +492,7 @@ Layout: A→B, A↔C, B↔C, B→D, D→E, C→E. A researcher, B analyst, C pla
 
 - **Type:** decision
 - **Severity:** Medium
-- **Status:** In progress
+- **Status:** Resolved
 - **Task / phase:** P5.2
 - **Opened:** 2026-10-05
 
@@ -499,6 +504,11 @@ The readable run_name is used only for the directory and manifest. Events use ru
 - Fix: human decision recorded in `answers.md` (D4). 
 - Regression test: see the linked implementation issues and commits.
 
+
+**Resolution** (2026-10-05)
+- Commit: ade3e41
+- Fix: Events use run_uid = r_ + sha256(run tuple)[:16], and replays derive theirs from the original. run_name (readable) lives only in the directory name and manifest.json. Plumbing gates re-run for stages 1-3: 43/43 PASS.
+- Regression test: tests/integration/test_injection.py::test_run_log_has_no_ground_truth, ::test_run_uid_is_deterministic_and_replays_differ
 ---
 
 ## ISSUE-019: D5: undefended baseline; defence becomes a Phase 13 factor

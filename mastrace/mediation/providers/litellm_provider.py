@@ -8,7 +8,9 @@ import os
 # a network call outside the gateways, caught by the no_network guard.
 os.environ.setdefault("LITELLM_LOCAL_MODEL_COST_MAP", "True")
 
+import json
 import time
+import urllib.request
 from collections.abc import Callable
 from typing import Any
 
@@ -52,6 +54,28 @@ class LiteLLMProvider:
         self.max_retries = max_retries
         self._sleep = sleep
         self._completion = completion or litellm.completion
+
+    def model_digest(self, timeout: float = 5.0) -> str | None:
+        """The served model's digest, for Ollama models (answers.md D2); None otherwise.
+
+        Asks the provider host itself (`<api_base>/api/tags`), the only host runs may reach.
+        """
+        model = self.cfg.model or ""
+        prefix = next((p for p in ("ollama_chat/", "ollama/") if model.startswith(p)), None)
+        if prefix is None:
+            return None
+        name = model[len(prefix) :]
+        base = (self.cfg.api_base() or "http://localhost:11434").rstrip("/")
+        try:
+            with urllib.request.urlopen(f"{base}/api/tags", timeout=timeout) as resp:
+                tags = json.loads(resp.read().decode("utf-8"))
+        except (OSError, ValueError) as e:
+            log.warning("could not read model digest from %s: %s", base, e)
+            return None
+        for m in tags.get("models", []):
+            if m.get("name") == name or m.get("model") == name:
+                return str(m.get("digest")) or None
+        return None
 
     def _kwargs(self, request: ModelRequest) -> dict[str, Any]:
         kwargs: dict[str, Any] = {
