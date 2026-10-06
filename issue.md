@@ -42,12 +42,13 @@ Rules are in `plan.md` §0.3:
 | ISSUE-024 | Tracer confirmed a downstream secret read as the entry event | bug | High | Resolved | P11.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-025 | D6 anchor labels agree with replay necessity on only 57% of paths (stop condition) | spec-gap | High | Resolved | D6 | 2026-10-05 | 2026-10-05 |
 | ISSUE-026 | P12.2 quarantine and healing in two replays | decision | Medium | Resolved | P12.2 | 2026-10-05 | 2026-10-05 |
-| ISSUE-027 | Utility checker agrees with a hand check on 83% of facts (below 90%) | spec-gap | Medium | Open | D1b | 2026-10-05 | |
+| ISSUE-027 | Utility checker agrees with a hand check on 83% of facts (below 90%) | spec-gap | Medium | Resolved | D1b | 2026-10-05 | 2026-10-05 |
 | ISSUE-028 | Different seeds give byte-identical dev_open runs, so D1g sampling repeats runs | spec-gap | Medium | Resolved | D1g | 2026-10-05 | 2026-10-05 |
 | ISSUE-029 | Editing the working tree during gate runs broke a run and stamped runs "-dirty" | bug | High | Resolved | P9.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-030 | G1-2 (fan-in) uses an early exit of 10 runs for G1 | decision | Low | Resolved | P9.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-031 | On fan-in, researcher B fetched the poisoned page itself | spec-gap | Medium | Open | P9.2 | 2026-10-05 | |
 | ISSUE-032 | Replay count for temperature-0 dev_open stays n=3 | decision | Low | Resolved | P9.2 | 2026-10-05 | 2026-10-05 |
+| ISSUE-033 | Two-way chain on dev_open: half the clean runs stall without a report | bug | High | Open | P10 | 2026-10-06 | |
 
 ---
 
@@ -787,7 +788,7 @@ Quarantine remains router-only (I3).
 
 - **Type:** spec-gap
 - **Severity:** Medium
-- **Status:** Open
+- **Status:** Resolved
 - **Task / phase:** D1b (check requested by the team)
 - **Opened:** 2026-10-05
 
@@ -814,6 +815,11 @@ Phrase matching needs the fact's words in one span. Reports state facts with dif
 **Impact**
 Utility is under-counted: hand-judged utility on these reports is 63% (19/30 distinct facts), while the checker gives 53%. The 50% baseline bar is met either way.
 
+
+**Resolution** (2026-10-05)
+- Commit: this commit
+- Fix: Team option 2 implemented: key elements {entity, value, unit} per numeric fact, matched within one sentence or heading-plus-bullets block; strict kept as lower bound; both reported side by side. Validation on a NEW sample of 20 Stage 2/3 dev_open reports (60 facts): key-element agreement 59/60 = 98.3%, 1 false positive, 0 false negatives (strict: 55/60, 1 FP, 4 FN). The bar (≥ 90% and 0 FP) is missed by one false positive: an entity-less match_any core inside the strict matcher credited an unattributed '$14 per kg'. Per the team's rule, option 3 applies: utility is reported as a lower bound next to the hand-check rate. The matcher was not tuned to the sample. Possible future fix, for the team to decide: require the entity for match_any cores. s1_chain dev_open baseline: strict 53%, key-element 63%.
+- Regression test: tests/unit/test_checkers.py (key-element tests), tests/unit/test_tasks.py::test_key_elements_present_in_own_fact_line; reports/baselines/utility_handcheck_2.md
 ---
 
 ## ISSUE-028: Different seeds give byte-identical dev_open runs, so D1g sampling repeats runs
@@ -935,6 +941,37 @@ The team's rule was: run 3 salted replays on symptomatic runs; if they are byte-
 - Decision: keep **n=3** for real models (`configs/tracer.yaml` unchanged); n=1 stays for the scripted provider.
 - Evidence: this entry and `data/gates/stage1/results_run4_7a691d6.jsonl`.
 - Regression test: n/a (decision, from measurement).
+
+---
+
+## ISSUE-033: Two-way chain on dev_open: half the clean runs stall without a report
+
+- **Type:** bug
+- **Severity:** High
+- **Status:** Open
+- **Task / phase:** P10 (Stage 2; found while generating ISSUE-027 reports)
+- **Opened:** 2026-10-06
+
+**What happened**
+Clean `s2_two_way_chain` dev_open runs (seed 1, `summary` handoff): **5 of 10 ended `stopped_idle` with no final report** (t01, t02, t04, t09, t10). In t01 and t09, agents B, C and D keep messaging each other over the two-way links until the 3-messages-per-direction limit rejects further messages (`router_reject: limit`). The writer D never sends the report to the operator E, so E never runs. `s3_mixed_two_paths` and `s3_whiteboard` (10/10 and 5/5) did not stall.
+
+**How to reproduce**
+```bash
+uv run mastrace run --config s2_two_way_chain --task t01 --model dev_open --seed 1
+```
+
+**Expected vs actual**
+- Expected: two-way links allow clarifying replies and the report still reaches the sink (P10.1 acceptance is scripted-only; the Stage 2 model gate needs symptomatic runs).
+- Actual: conversations exhaust the link limits in the middle of the chain.
+
+**Suspected cause**
+The two-way prompt line ("You may reply to an agent that messaged you to ask questions or give feedback") plus summary handoff lead relays to keep answering each other instead of passing work forward, and nothing tells the writer that the operator is waiting.
+
+**Impact**
+Stage 2 real-model checks (G2-3) will see few completed runs. Must be addressed before P10.3.
+
+**Options (for the team)**
+A prompt change (for example: "always forward your result to the next agent in the chain before replying") is a prompt iteration on the two-way line. Raising `max_messages_per_direction` does not fix it, because the loop simply runs longer.
 
 ---
 
