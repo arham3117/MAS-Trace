@@ -1047,6 +1047,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P11.1 · 98c1be3 · plain code (D7): stage-3 path tests by distinguishing edge; G3-1 both paths 5/5, G3-2 causal path with C resistant 5/5; Stage 3 metrics wait for D6
 - 2026-10-05 · P11.2 · 94262c4 · candidate pairs confirm independent causes; scorer compares entry sets; derived-candidate rule (ISSUE-024)
 - 2026-10-05 · D1e · efc64e4 · clean baseline (summary, plain): dev_open 53%, scripted 100% (ISSUE-023 resolved)
+- 2026-10-05 · D6 · be650f3 · anchor true_paths merged; validation necessity 57% (stop, ISSUE-025), sufficiency 100%; labels not used in reports
 
 ---
 
