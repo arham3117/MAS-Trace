@@ -107,3 +107,12 @@ def test_propagation_table() -> None:
     rows = [{"type": "propagation", "config": "s1_chain", "goal": "G1", "hops": hops}] * 2
     table = "\n".join(gates.propagation_table(rows))
     assert "| s1_chain | G1 | 2 | 100% / 100% | 100% / 0% | 0% / 0% |" in table
+
+
+def test_fanin_g1_early_exit_is_ten(lab: Lab, monkeypatch: pytest.MonkeyPatch) -> None:
+    """ISSUE-030: on s1_fanin, G1 stops after 10 runs that never leave the entry agent."""
+    monkeypatch.setattr(Lab, "trace", lambda self, r, reuse=True: None)
+    g = sample_goal(lab, "s1_fanin", "G1", ok, model="scripted_resistant")
+    assert g.tried == 10 and g.finding is not None and "10 consecutive" in g.finding
+    lines = [json.loads(x) for x in harness.RESULTS.read_text().splitlines()]
+    assert all(x["entry_handling"] == "omitted" for x in lines if x.get("type") == "propagation")

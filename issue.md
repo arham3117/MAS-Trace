@@ -44,6 +44,8 @@ Rules are in `plan.md` §0.3:
 | ISSUE-026 | P12.2 quarantine and healing in two replays | decision | Medium | Resolved | P12.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-027 | Utility checker agrees with a hand check on 83% of facts (below 90%) | spec-gap | Medium | Open | D1b | 2026-10-05 | |
 | ISSUE-028 | Different seeds give byte-identical dev_open runs, so D1g sampling repeats runs | spec-gap | Medium | Resolved | D1g | 2026-10-05 | 2026-10-05 |
+| ISSUE-029 | Editing the working tree during gate runs broke a run and stamped runs "-dirty" | bug | High | In progress | P9.2 | 2026-10-05 | |
+| ISSUE-030 | G1-2 (fan-in) uses an early exit of 10 runs for G1 | decision | Low | Resolved | P9.2 | 2026-10-05 | 2026-10-05 |
 
 ---
 
@@ -826,6 +828,51 @@ D1g samples (task, seed) pairs over t01–t10 × seeds {1, 2}. That is effective
 - Commit: 3e63e0a
 - Fix: Team decision: keep temperature 0. Gate sampling is seed 1 x task x variant x placement (up to 40 per goal), with an early exit after 20 consecutive non-propagating runs. Gate data persists in data/gates/stage<N>/ and real-model runs are reused. Phase 13 matrices replace seeds with variant x placement (configs/experiments/, plan §10.1 amended). The replay-count check (n=3 vs n=1) is pending 3 symptomatic runs.
 - Regression test: tests/unit/test_gate_harness.py (plan order, early exit, G2 fallback, run reuse, middle placement)
+---
+
+## ISSUE-029: Editing the working tree during gate runs broke a run and stamped runs "-dirty"
+
+- **Type:** bug
+- **Severity:** High
+- **Status:** In progress
+- **Task / phase:** P9.2
+- **Opened:** 2026-10-05
+
+**What happened**
+1. While the restarted Stage 1 gate was running, I added `key_elements` to every `task.yaml` (ISSUE-027). The gate process had loaded `TaskSpec` before that schema change, so G1-1 failed on the new field (`extra_forbidden`) after a few minutes. Nothing was lost, because the data directory is persistent.
+2. `code_version()` reads the working tree when each run starts. Runs that started while I had uncommitted edits in the main tree are stamped `<hash>-dirty`. That covers 21 real-model runs in `data/gates/stage1/`, some from the restarted gate itself: during doc edits (`plan.md`, `updates.md`, `issue.md`) and during code edits whose modules the running process had already loaded. The code that actually ran was committed, but the stamps cannot prove it.
+
+**Expected vs actual**
+- Expected: gate evidence comes from committed code; no edits under a running job.
+- Actual: one failed gate start and 21 dirty-stamped runs.
+
+**Fix**
+- All side work now happens in a separate git worktree (`../MAS-Trace-wt`, branch `gate-side-work`) and is fast-forwarded into `main` only between gate runs.
+- `mastrace gate` refuses to start on a dirty tree (`DirtyTree`).
+- The gate report lists the code version of every real-model run it used and counts dirty ones.
+- Dirty-stamped runs are moved (not deleted) to `data/gates/stage1/archive_dirty/` and re-run on committed code.
+
+**Regression test**
+`tests/unit/test_gates.py::test_gate_refuses_dirty_tree`, `::test_run_versions_section`.
+
+---
+
+## ISSUE-030: G1-2 (fan-in) uses an early exit of 10 runs for G1
+
+- **Type:** decision
+- **Severity:** Low
+- **Status:** Resolved
+- **Task / phase:** P9.2
+- **Opened:** 2026-10-05
+
+**What happened**
+Team choice: G1 never left the entry agent in 20 runs on `s1_chain`. For G1-2 (`s1_fanin`), the G1 early exit is therefore 10 consecutive non-propagating runs instead of 20. G2 keeps 20. The finding is recorded in the check notes as before.
+
+**Resolution**
+- Date: 2026-10-05
+- Fix: `EARLY_EXIT_OVERRIDES = {("s1_fanin", "G1"): 10}` in `tests/gates/harness.py`.
+- Regression test: `tests/unit/test_gate_harness.py::test_fanin_g1_early_exit_is_ten`
+
 ---
 
 <!--

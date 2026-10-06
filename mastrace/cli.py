@@ -183,9 +183,13 @@ def gate_cmd(
     ] = False,
 ) -> None:
     """Run the common checks and every stage up to N; write the gate report."""
-    from mastrace.control.gates import run_gate
+    from mastrace.control.gates import DirtyTree, run_gate
 
-    outcome = run_gate(stage, include_model=not plumbing_only)
+    try:
+        outcome = run_gate(stage, include_model=not plumbing_only)
+    except DirtyTree as e:
+        Console().print(f"[red]{e}[/red]")
+        raise typer.Exit(code=2) from e
     Console().print(f"[bold]Stage {stage}: {outcome.overall}[/bold]  report: {outcome.report}")
     if outcome.overall != "PASS":
         raise typer.Exit(code=1)

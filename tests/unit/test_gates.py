@@ -34,3 +34,24 @@ def test_report_and_status(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
 def test_gate_files() -> None:
     names = [Path(f).name for f in gates.gate_files(2)]
     assert names == ["test_gate_common.py", "test_gate_stage1.py", "test_gate_stage2.py"]
+
+
+def test_gate_refuses_dirty_tree(monkeypatch: pytest.MonkeyPatch) -> None:
+    """ISSUE-029: gate evidence must come from committed code."""
+    monkeypatch.setattr(gates, "code_version", lambda: "abc1234-dirty")
+    with pytest.raises(gates.DirtyTree, match="dirty"):
+        gates.run_gate(1)
+
+
+def test_run_versions_section(tmp_path: Path) -> None:
+    import json
+
+    p = tmp_path / "c.jsonl"
+    p.write_text(
+        "\n".join(
+            json.dumps({"type": "run_version", "run": f"r{i}", "code_version": v})
+            for i, v in enumerate(["aaa", "aaa", "bbb-dirty"])
+        )
+    )
+    text = "\n".join(gates.run_versions_section(p))
+    assert "`aaa`: 2" in text and "Dirty-stamped runs: **1**" in text

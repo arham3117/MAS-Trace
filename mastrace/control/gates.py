@@ -36,8 +36,24 @@ def gate_files(stage: int) -> list[str]:
     ]
 
 
-def run_gate(stage: int, include_model: bool = True, extra: list[str] | None = None) -> GateOutcome:
-    """Run the gate suites with pytest, then write `reports/gates/stage<N>_<date>.md`."""
+class DirtyTree(RuntimeError):
+    """The gate must run on committed code (ISSUE-029)."""
+
+
+def run_gate(
+    stage: int,
+    include_model: bool = True,
+    extra: list[str] | None = None,
+    allow_dirty: bool = False,
+) -> GateOutcome:
+    """Run the gate suites with pytest, then write `reports/gates/stage<N>_<date>.md`.
+
+    Refuses to start on a dirty working tree: every run stamps `code_version`, and gate
+    evidence must come from committed code (ISSUE-029). Do side work in a git worktree.
+    """
+    version = code_version()
+    if version.endswith("-dirty") and not allow_dirty:
+        raise DirtyTree(f"working tree is dirty ({version}); commit or stash before a gate run")
     GATES_DIR.mkdir(parents=True, exist_ok=True)
     CURRENT.unlink(missing_ok=True)
     marker = "gate" if include_model else "gate and not model"
@@ -93,6 +109,22 @@ def propagation_table(rows: list[dict[str, Any]]) -> list[str]:
             o = sum(bool(r["hops"][hop]["overlap"]) for r in rs) / len(rs)
             cells.append(f"{a:.0%} / {o:.0%}")
         out.append(f"| {config} | {goal} | {len(rs)} | " + " | ".join(cells) + " |")
+    out += [
+        "",
+        "How the entry agent handled the attacker request (from its outgoing messages):",
+        "",
+        "| Config | Goal | Runs | omitted | refused or flagged | relayed |",
+        "|---|---|---|---|---|---|",
+    ]
+    for (config, goal), rs in sorted(groups.items()):
+        c = {
+            h: sum(r.get("entry_handling") == h for r in rs)
+            for h in ("omitted", "refused_or_flagged", "relayed")
+        }
+        out.append(
+            f"| {config} | {goal} | {len(rs)} | {c['omitted']} | "
+            f"{c['refused_or_flagged']} | {c['relayed']} |"
+        )
     return out
 
 
@@ -136,6 +168,24 @@ def write_report(
     path = GATES_DIR / f"stage{stage}_{day.isoformat()}.md"
     path.write_text("\n".join(lines), encoding="utf-8")
     return path
+
+
+def run_versions_section(path: Path = CURRENT) -> list[str]:
+    """Code versions of the real-model runs behind the report (ISSUE-029)."""
+    versions = [r for r in _lines(path) if r.get("type") == "run_version"]
+    if not versions:
+        return []
+    by: dict[str, int] = {}
+    for r in versions:
+        by[str(r["code_version"])] = by.get(str(r["code_version"]), 0) + 1
+    dirty = sum(n for v, n in by.items() if v.endswith("-dirty"))
+    return [
+        "",
+        "## Code versions of real-model runs",
+        "",
+        ", ".join(f"`{v}`: {n}" for v, n in sorted(by.items())),
+        f"Dirty-stamped runs: **{dirty}**",
+    ]
 
 
 def stage_status() -> dict[int, tuple[str, str]]:
