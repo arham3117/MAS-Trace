@@ -761,8 +761,10 @@ Quarantine remains router-only (I3).
 - Fix: `mastrace/analysis/respond.py`, `Router.quarantine_turn`, `ToolGateway.revoke_turn`, and `run_once` / `replay` `quarantine=`.
 - Regression test: `tests/integration/test_respond.py`. All 7 configs pass, across stages 1–3: contained, recovered, utility_after ≥ 2/3.
 
-**Needs from the human:** confirm this reading of P12.2.
+**Human confirmation:** received 2026-10-05.
 
+
+**Note (2026-10-05): team confirmed** the two-replay reading. The heal record reports `contained` and `recovered` separately. A new test proves the healing replay's overrides come only from the verdict's confirmed entry events: a doctored verdict naming a non-GT read gets exactly that call neutralized, and any ground-truth access raises. Test: `tests/integration/test_respond.py::test_healing_neutralizes_verdict_entries_never_ground_truth` (commit ad22c65).
 ---
 
 ## ISSUE-027: Utility checker agrees with a hand check on 83% of facts (below 90%)
