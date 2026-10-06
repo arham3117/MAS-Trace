@@ -108,3 +108,21 @@ def test_tracing_twice_gives_distinct_verdicts(settings: Settings) -> None:
     b = t.trace(r.run_id, sid, make_symptom_check(gt, settings))
     assert a.verdict_id.endswith(":1") and b.verdict_id.endswith(":2")
     assert (a.entry_turn, a.paths) == (b.entry_turn, b.paths)
+
+
+def test_whiteboard_attack_and_trace(settings: Settings) -> None:
+    """answers.md D3: the provisional whiteboard layout runs an attack and traces it.
+
+    With every agent gullible the payload reaches E first over the shorter route A→C→E,
+    so that is the causal path; with C resistant it is the intended route A→B→D→E.
+    """
+    r, gt, sid = setup(settings, config="s3_whiteboard")
+    v = Tracer(settings).trace(r.run_id, sid, make_symptom_check(gt, settings))
+    assert (v.status, v.entry_agent, v.entry_turn) == ("confirmed", "A", "A#1")
+    assert v.paths == [["A", "C", "E"]]
+    s2 = Settings(data_dir=settings.data_dir.parent / "resistant_c")
+    r2, gt2, sid2 = setup(s2, config="s3_whiteboard", policy_overrides={"C": "resistant"})
+    v2 = Tracer(s2).trace(r2.run_id, sid2, make_symptom_check(gt2, s2))
+    assert (v2.status, v2.entry_turn) == ("confirmed", "A#1")
+    marks = {tuple(x["path"]): x["status"] for x in v2.replays if x["kind"] == "path"}
+    assert marks == {("A", "B", "D", "E"): "causal", ("A", "C", "E"): "non_causal"}

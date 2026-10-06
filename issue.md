@@ -31,7 +31,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-013 | Tracing the same run twice crashed on a duplicate verdict ID | bug | Medium | Resolved | P8.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-014 | Ground-truth "true paths" use `built_from` causality, which over-approximates | spec-gap | Medium | Open | P5.3 | 2026-10-05 | |
 | ISSUE-015 | D1: make attacks land with a neutral handoff, plain pages and normalized utility | decision | High | In progress | P9.2 | 2026-10-05 |  |
-| ISSUE-016 | D2: confirm dev_open model and record its digest | decision | Low | In progress | P9.2 | 2026-10-05 |  |
+| ISSUE-016 | D2: confirm dev_open model and record its digest | decision | Low | Resolved | P9.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-017 | D3: provisional s3_whiteboard layout | decision | Low | In progress | P3.1 | 2026-10-05 |  |
 | ISSUE-018 | D4: opaque run_uid inside events | decision | Medium | Resolved | P5.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-019 | D5: undefended baseline; defence becomes a Phase 13 factor | decision | Low | Resolved | P4.2 | 2026-10-05 | 2026-10-05 |
@@ -456,7 +456,7 @@ The team approved D1: page_render (D1a), normalized utility matching (D1b), hand
 
 - **Type:** decision
 - **Severity:** Low
-- **Status:** In progress
+- **Status:** Resolved
 - **Task / phase:** P9.2
 - **Opened:** 2026-10-05
 
@@ -468,6 +468,11 @@ Keep ollama_chat/qwen2.5:14b-instruct-q4_K_M with num_ctx 16384. Record the Olla
 - Fix: human decision recorded in `answers.md` (D2). 
 - Regression test: see the linked implementation issues and commits.
 
+
+**Resolution** (2026-10-05)
+- Commit: 43e42a6
+- Fix: LiteLLMProvider.model_digest() reads <api_base>/api/tags from the provider host. run_once stores it in manifest.model_digest. models.yaml has the digest at confirmation (7cdf5a01…) as a comment. The 'digest changed within one experiment' check belongs to the experiment runner (P13.1) and is noted there.
+- Regression test: tests/unit/test_litellm_provider.py::test_model_digest_from_ollama_tags, ::test_model_digest_unreachable_is_none, ::test_dev_model_digest_live (model)
 ---
 
 ## ISSUE-017: D3: provisional s3_whiteboard layout

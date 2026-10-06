@@ -875,6 +875,7 @@ Each task lists **Do** (what to build) and **Acceptance** (what must be true or 
     - `--resume` skips run IDs that already have a run summary with a final status.
     - Workers are processes, and each run is independent.
     - Track tokens and cost per model.
+    - If the dev model's digest (manifest.model_digest) changes between runs of one experiment, log an issue (amended 2026-10-05, answers.md D2).
   - **Acceptance:** an interrupted run resumes without duplicating runs.
 - [ ] **P13.2 Enable remaining attacks and controls.**
   - **Do:**
@@ -1035,6 +1036,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P9.1 · 456c9c8 · stage 1 plumbing gate PASS (all common + G1-x scripted 5/5) at 9c4a657: reports/gates/stage1_2026-10-05_plumbing.md; no gate-failure issues
 - 2026-10-05 · P9.2 · 054c8e1 · stage 1 model gate INCONCLUSIVE: G-C4 dev 5/5, G1-1/G1-2 dev 0/15 symptomatic; ISSUE-011 blocked on human decision
 - 2026-10-05 · D4 · ade3e41 · opaque run_uid in events (ISSUE-007/018 resolved); plumbing gates stages 1-3 re-run 43/43 PASS
+- 2026-10-05 · D2 · 43e42a6 · model digest recorded per run (ISSUE-016 resolved)
 
 ---
 

@@ -1,7 +1,7 @@
-# PLACEHOLDER layout (ISSUE-006): replace with the team's whiteboard layout.
 name: s3_whiteboard
 stage: 3
-description: PLACEHOLDER mixed layout A→B, A↔C, B→D, C→D, D↔E until the team's whiteboard layout is provided
+description: Provisional 5-agent mapping of the team whiteboard (answers.md D3)
+# Intended causal route under attack: A→B→D→E; alternative path: A→C→E.
 agents:
   - {id: A, role: researcher, tools: [web_fetch]}
   - {id: B, role: analyst,    tools: []}
@@ -11,9 +11,10 @@ agents:
 links:
   - {from: A, to: B, type: one_way}
   - {from: A, to: C, type: two_way}
+  - {from: B, to: C, type: two_way}
   - {from: B, to: D, type: one_way}
-  - {from: C, to: D, type: one_way}
-  - {from: D, to: E, type: two_way}
+  - {from: D, to: E, type: one_way}
+  - {from: C, to: E, type: one_way}
 entry_agents: [A]
 sink_agent: E
 limits:
