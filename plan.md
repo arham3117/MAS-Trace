@@ -1037,6 +1037,7 @@ Append one line per completed task or significant event, newest last:
 - 2026-10-05 · P9.2 · 054c8e1 · stage 1 model gate INCONCLUSIVE: G-C4 dev 5/5, G1-1/G1-2 dev 0/15 symptomatic; ISSUE-011 blocked on human decision
 - 2026-10-05 · D4 · ade3e41 · opaque run_uid in events (ISSUE-007/018 resolved); plumbing gates stages 1-3 re-run 43/43 PASS
 - 2026-10-05 · D2 · 43e42a6 · model digest recorded per run (ISSUE-016 resolved)
+- 2026-10-05 · D3 · 792fc5c · provisional whiteboard layout (ISSUE-006/017 resolved); attack+trace OK; A→C→E is causal unless C is resistant
 
 ---
 

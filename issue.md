@@ -21,7 +21,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-003 | Scope of the `no_network` fixture | decision | Low | Resolved | P0.4 | 2026-10-05 | 2026-10-05 |
 | ISSUE-004 | Recorder design: local refs, clock, signature bytes and tamper triggers | decision | Low | Resolved | P1.6 | 2026-10-05 | 2026-10-05 |
 | ISSUE-005 | Prompt/text contract and ScriptedProvider details | decision | Low | Resolved | P2.1 | 2026-10-05 | 2026-10-05 |
-| ISSUE-006 | `s3_whiteboard` layout is unknown | spec-gap | Medium | Open | P3.1 | 2026-10-05 | |
+| ISSUE-006 | `s3_whiteboard` layout is unknown | spec-gap | Medium | Resolved | P3.1 | 2026-10-05 | 2026-10-05 |
 | ISSUE-007 | Run IDs contain the attack ID, and every event ID contains the run ID | spec-gap | Low | Resolved | P5.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-008 | The n=3 majority replays would be identical because of the shared cache | spec-gap | Medium | Resolved | P7.1 | 2026-10-05 | 2026-10-05 |
 | ISSUE-009 | `dev_open` clean utility is below 50% on `s1_chain` | spec-gap | High | Resolved | P4.5 | 2026-10-05 | 2026-10-05 |
@@ -32,7 +32,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-014 | Ground-truth "true paths" use `built_from` causality, which over-approximates | spec-gap | Medium | Open | P5.3 | 2026-10-05 | |
 | ISSUE-015 | D1: make attacks land with a neutral handoff, plain pages and normalized utility | decision | High | In progress | P9.2 | 2026-10-05 |  |
 | ISSUE-016 | D2: confirm dev_open model and record its digest | decision | Low | Resolved | P9.2 | 2026-10-05 | 2026-10-05 |
-| ISSUE-017 | D3: provisional s3_whiteboard layout | decision | Low | In progress | P3.1 | 2026-10-05 |  |
+| ISSUE-017 | D3: provisional s3_whiteboard layout | decision | Low | Resolved | P3.1 | 2026-10-05 | 2026-10-05 |
 | ISSUE-018 | D4: opaque run_uid inside events | decision | Medium | Resolved | P5.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-019 | D5: undefended baseline; defence becomes a Phase 13 factor | decision | Low | Resolved | P4.2 | 2026-10-05 | 2026-10-05 |
 | ISSUE-020 | D6: anchor-based true paths validated by replay | decision | Medium | In progress | P5.3 | 2026-10-05 |  |
@@ -170,7 +170,7 @@ P1.4–P1.6 leave several details open. These choices were made:
 
 - **Type:** spec-gap
 - **Severity:** Medium
-- **Status:** Open
+- **Status:** Resolved
 - **Task / phase:** P3.1
 - **Opened:** 2026-10-05
 
@@ -188,6 +188,11 @@ The placeholder is used. No gate check depends on `s3_whiteboard` specifically, 
 
 
 **Note (2026-10-05):** Human decision D3 (answers.md; ISSUE-017): provisional layout given; resolved once the config is updated.
+
+**Resolution** (2026-10-05)
+- Commit: 792fc5c
+- Fix: Provisional; the team may revise it before Phase 13. The layout from answers.md D3 is in configs/graphs/s3_whiteboard.yaml. Observation for the team: with every scripted agent gullible, the payload reaches E first over the shorter route A→C→E, so that is the causal path. Only with C resistant is A→B→D→E causal (and the tracer marks A→C→E non_causal).
+- Regression test: tests/integration/test_tracer.py::test_whiteboard_attack_and_trace, tests/unit/test_graph_config.py
 ---
 
 ## ISSUE-007: Run IDs contain the attack ID, and every event ID contains the run ID
@@ -479,7 +484,7 @@ Keep ollama_chat/qwen2.5:14b-instruct-q4_K_M with num_ctx 16384. Record the Olla
 
 - **Type:** decision
 - **Severity:** Low
-- **Status:** In progress
+- **Status:** Resolved
 - **Task / phase:** P3.1
 - **Opened:** 2026-10-05
 
@@ -491,6 +496,11 @@ Layout: A→B, A↔C, B↔C, B→D, D→E, C→E. A researcher, B analyst, C pla
 - Fix: human decision recorded in `answers.md` (D3). 
 - Regression test: see the linked implementation issues and commits.
 
+
+**Resolution** (2026-10-05)
+- Commit: 792fc5c
+- Fix: Provisional; the team may revise it before Phase 13. The layout from answers.md D3 is in configs/graphs/s3_whiteboard.yaml. Observation for the team: with every scripted agent gullible, the payload reaches E first over the shorter route A→C→E, so that is the causal path. Only with C resistant is A→B→D→E causal (and the tracer marks A→C→E non_causal).
+- Regression test: tests/integration/test_tracer.py::test_whiteboard_attack_and_trace, tests/unit/test_graph_config.py
 ---
 
 ## ISSUE-018: D4: opaque run_uid inside events
