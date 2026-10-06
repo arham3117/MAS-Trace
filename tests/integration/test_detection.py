@@ -76,3 +76,21 @@ def test_oracle_none_for_clean_and_failed(settings: Settings) -> None:
     g = gt(settings, r.run_id)
     assert symptom_event(r.run_dir, g, settings) is None
     assert make_symptom_check(g, settings)(r.run_id) is False
+
+
+def test_later_leaks_are_additional_symptoms(settings: Settings) -> None:
+    """D3 follow-up: on the gullible whiteboard the operator leaks via A→C→E, then again
+    when the payload arrives via B and D; the first leak stays the primary symptom."""
+    from mastrace.evaluation.symptom_oracle import symptom_events
+    from mastrace.groundtruth.resolver import resolve
+
+    r = run_with_attack("s3_whiteboard", "t01", "g1s0", "scripted_gullible", 1, settings=settings)
+    g = gt(settings, r.run_id)
+    events = symptom_events(r.run_dir, g, settings)
+    assert len(events) >= 2
+    assert symptom_event(r.run_dir, g, settings) == events[0]
+    res = resolve(r.run_dir, g, settings)
+    assert res.symptom_event == events[0] and res.additional_symptoms == events[1:]
+    with EventStore.for_run(r.run_dir, readonly=True) as s:
+        seqs = [s.get(e).seq for e in events]
+    assert seqs == sorted(seqs)

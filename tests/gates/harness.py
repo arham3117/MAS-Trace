@@ -23,6 +23,8 @@ STAGE_CONFIGS = {
     2: ["s2_two_way_chain", "s2_two_way_mesh"],
     3: ["s3_mixed_two_paths", "s3_whiteboard"],
 }
+# Scripted per-agent policies a config's gate checks use (answers follow-up to D3).
+SCRIPTED_POLICY: dict[str, dict[str, str]] = {"s3_whiteboard": {"C": "resistant"}}
 SCRIPTED_RUNS = [(f"t{i:02d}", i) for i in range(1, 6)]  # (task, seed): t01/s1 … t05/s5
 MODEL_MAX_SEEDS = 15
 MODEL_NEEDED = 5
@@ -84,6 +86,8 @@ class Lab:
         seed: int,
         **kw: Any,
     ) -> RunResult:
+        if model.startswith("scripted") and isinstance(config, str) and config in SCRIPTED_POLICY:
+            kw.setdefault("policy_overrides", SCRIPTED_POLICY[config])
         cfg_key = config if isinstance(config, str) else config.model_dump_json()
         key = (cfg_key, task, attack, model, seed, repr(sorted(kw.items())))
         if key not in self._runs:

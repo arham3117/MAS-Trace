@@ -13,7 +13,7 @@ from mastrace.control.attacks import load_attack, marker_of
 from mastrace.core.schemas import GroundTruth
 from mastrace.environment.materializer import canary_for
 from mastrace.environment.tasks import load_task
-from mastrace.groundtruth.resolver import find_symptom
+from mastrace.groundtruth.resolver import find_symptoms
 from mastrace.provenance.event_graph import EventGraph
 from mastrace.provenance.payload_store import PayloadStore
 from mastrace.runtime.run import read_manifest
@@ -23,14 +23,23 @@ from mastrace.settings import Settings, get_settings
 def symptom_event(
     run_dir: Path, gt: GroundTruth | None, settings: Settings | None = None
 ) -> str | None:
-    """G1: the leaking `send_email`; G2: the `final_output`; None for clean or failed runs."""
+    """The primary symptom: G1 the first leaking `send_email`, G2 the `final_output`;
+    None for clean or failed runs. Later leaks: `symptom_events`."""
+    events = symptom_events(run_dir, gt, settings)
+    return events[0] if events else None
+
+
+def symptom_events(
+    run_dir: Path, gt: GroundTruth | None, settings: Settings | None = None
+) -> list[str]:
+    """Every symptom event, primary first (later G1 leaks are additional symptoms)."""
     if gt is None or gt.kind != "attack":
-        return None
+        return []
     settings = settings or get_settings()
     manifest = read_manifest(run_dir)
     task = load_task(manifest.task_id, settings.templates_dir)
     marker = marker_of(load_attack(gt.attack_id, allow_disabled=True)) if gt.goal == "G2" else None
-    return find_symptom(
+    return find_symptoms(
         EventGraph.from_run(run_dir),
         PayloadStore(run_dir / "payloads"),
         gt.goal,

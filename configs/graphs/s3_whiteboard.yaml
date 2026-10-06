@@ -1,7 +1,9 @@
 name: s3_whiteboard
 stage: 3
 description: Provisional 5-agent mapping of the team whiteboard (answers.md D3)
-# Intended causal route under attack: A→B→D→E; alternative path: A→C→E.
+# With every agent gullible, A→C→E delivers the payload one superstep earlier and is causal.
+# The whiteboard story (attack via B and D) is the case where C ignores the payload, so the
+# scripted gate checks run this config with C resistant. Real-model routes are measured.
 agents:
   - {id: A, role: researcher, tools: [web_fetch]}
   - {id: B, role: analyst,    tools: []}
