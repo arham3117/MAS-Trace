@@ -40,6 +40,7 @@ Rules are in `plan.md` §0.3:
 | ISSUE-022 | D8: commercial model deferred until after the pilot | decision | Low | Resolved | P13.3 | 2026-10-05 | 2026-10-05 |
 | ISSUE-023 | Clean baseline with `summary` handoff and `plain` pages is below 50% | spec-gap | High | Resolved | D1e | 2026-10-05 | 2026-10-05 |
 | ISSUE-024 | Tracer confirmed a downstream secret read as the entry event | bug | High | Resolved | P11.2 | 2026-10-05 | 2026-10-05 |
+| ISSUE-025 | D6 anchor labels agree with replay necessity on only 57% of paths (stop condition) | spec-gap | High | Blocked | D6 | 2026-10-05 | |
 
 ---
 
@@ -665,6 +666,37 @@ Under §7.11 step 3, internal reads are entry candidates. In G1 runs, the operat
 - Commit: see the P11.2 commit
 - Fix: a candidate is **derived** if another top candidate reaches it through at least one message event. Confirmed non-derived candidates win. If none confirm, the tracer tries pairs of non-derived candidates (independent causes). A's reads of its own task sources are not derived, because no message lies between them.
 - Regression test: `tests/integration/test_tracer.py::test_downstream_secret_read_is_not_the_entry`, `tests/integration/test_multi_cause.py::test_double_injection_confirms_both`
+
+---
+
+## ISSUE-025: D6 anchor labels agree with replay necessity on only 57% of paths (stop condition)
+
+- **Type:** spec-gap
+- **Severity:** High
+- **Status:** Blocked
+- **Task / phase:** D6 (answers.md §6 stop condition)
+- **Opened:** 2026-10-05
+
+**What happened**
+D6 validation on 20 scripted Stage 3 attack runs (35 run–path pairs). The sample: `s3_mixed_two_paths` and `s3_whiteboard`, t01–t10, `g1s0`; t01–t05 all gullible, t06–t10 with C resistant. Report: `reports/results/d6_path_validation.md`.
+- **Anchor labels vs replay necessity** (the answers.md D6 rule: drop the path's distinguishing edge and check whether the symptom disappears): **20/35 = 57%**, below the 90% threshold.
+- Anchor labels vs replay **sufficiency** (drop every *other* path's distinguishing edge and check whether the symptom still occurs): **35/35 = 100%**.
+
+**Examples**
+- `s3_mixed_two_paths-t01-g1s0` (all gullible): both A→B→C→E and A→B→D→E carry the payload, so both are anchor-true. Dropping either one alone leaves the leak, so both are "not necessary" by replay.
+- `s3_whiteboard-t01-g1s0` (all gullible): A→C→E carried the payload and triggered the leak, so it is anchor-true. Dropping A→C delays the leak, which then arrives over A→B→D→E, so it is "not necessary".
+- All 10 "C resistant" runs: anchor, necessity and sufficiency labels agree 100%.
+
+**Suspected cause**
+This is a difference in definitions, not a labelling bug. Anchors measure whether a path *carried* attacker content. Necessity asks whether the symptom *depends on that path alone*. With redundant routes, every route carries the attack and none is necessary.
+
+**Options for the team**
+1. Validate anchor labels against **sufficiency** instead (100% here).
+2. Keep necessity as the definition of truth, and replace anchor labels with replay labels on the evaluation side. That is exact but costs replays.
+3. Report both: "carried" (anchor) and "necessary" (replay) as separate path metrics.
+
+**Workaround (if any)**
+Anchor-based `true_paths` are merged as code. Per answers.md D6/§6 they are **not used in any report** until the team decides. ISSUE-014 and ISSUE-020 stay open.
 
 ---
 

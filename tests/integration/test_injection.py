@@ -167,3 +167,33 @@ def test_fanin_target_is_a_and_b_reads_clean(settings: Settings) -> None:
     r = attack_run(settings, "scripted_gullible", config="s1_fanin")
     res = resolve(r.run_dir, gt_of(settings, r.run_id), settings)
     assert res.entry_turn == "A#1" and res.true_paths == [["A", "C", "D", "E"]]
+
+
+def test_anchor_paths_exclude_paths_that_dropped_the_payload(settings: Settings) -> None:
+    """answers.md D6: with C resistant, the path through C carried no attacker content."""
+    r = run_with_attack(
+        "s3_mixed_two_paths",
+        "t01",
+        "g1s0",
+        "scripted_gullible",
+        1,
+        settings=settings,
+        policy_overrides={"C": "resistant"},
+    )
+    res = resolve(r.run_dir, gt_of(settings, r.run_id), settings)
+    assert res.causal_paths == [["A", "B", "C", "E"], ["A", "B", "D", "E"]]
+    assert res.true_paths == [["A", "B", "D", "E"]]
+
+
+def test_anchor_paths_g2(settings: Settings) -> None:
+    r = run_with_attack(
+        "s3_mixed_two_paths",
+        "t01",
+        "g2s1",
+        "scripted_gullible",
+        1,
+        settings=settings,
+        policy_overrides={"D": "resistant"},
+    )
+    res = resolve(r.run_dir, gt_of(settings, r.run_id), settings)
+    assert res.attack_succeeded and res.true_paths == [["A", "B", "C", "E"]]
