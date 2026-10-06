@@ -140,29 +140,95 @@ def log_complete(lab: Lab, r: RunResult) -> bool:
     )
 
 
-def model_check(
+MODEL_PAIRS = [(f"t{i:02d}", seed) for i in range(1, 11) for seed in (1, 2)]  # D1g
+GOAL_ATTACKS = {"G1": ["g1s0"], "G2": ["g2s0", "g2s1"]}  # D1f fallback order
+
+
+def record_propagation(lab: Lab, config: str, r: RunResult) -> None:
+    """Append the run's per-hop propagation to `_current.jsonl` (answers.md D1d)."""
+    from mastrace.evaluation.propagation import as_dict, propagation
+
+    gt = lab.gt(r.run_id)
+    if gt is None:
+        return
+    line = {
+        "type": "propagation",
+        "config": config,
+        "goal": gt.goal,
+        "attack": gt.attack_id,
+        "run": r.run_id,
+        "hops": as_dict(propagation(r.run_dir, gt)),
+    }
+    with RESULTS.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(line) + "\n")
+
+
+@dataclass
+class GoalSample:
+    """Sampling result for one attack goal."""
+
+    goal: str
+    correct: int = 0
+    symptomatic: int = 0
+    tried: int = 0
+    ids: list[str] = field(default_factory=list)
+
+    @property
+    def conclusive(self) -> bool:
+        return self.symptomatic >= MODEL_NEEDED
+
+
+def sample_goal(
     lab: Lab,
     config: str,
-    attack: str,
+    goal: str,
     judge: Callable[[RunResult, Verdict], bool],
     model: str = "dev_open",
     **kw: Any,
-) -> tuple[int, int, list[str], bool]:
-    """§9.3: seeds 1.. (task t01-t05 in turn) until 5 symptomatic runs, at most 15 seeds.
+) -> GoalSample:
+    """§9.3 as amended by answers.md D1g: (task, seed) pairs over t01-t10 x seeds {1, 2},
+    stopping at 5 symptomatic runs; for G2, `g2s0` first, then `g2s1`."""
+    out = GoalSample(goal)
+    for attack in GOAL_ATTACKS[goal]:
+        for task, seed in MODEL_PAIRS:
+            if out.conclusive:
+                return out
+            r = lab.run(config, task, attack, model, seed, **kw)
+            out.tried += 1
+            record_propagation(lab, config, r)
+            v = lab.trace(r)
+            if v is None:
+                continue
+            out.symptomatic += 1
+            out.ids.append(r.run_id)
+            out.correct += judge(r, v)
+    return out
 
-    Returns (correct, symptomatic, run_ids, inconclusive).
+
+def model_check(
+    lab: Lab, check: str, config: str, judge: Callable[[RunResult, Verdict], bool], **kw: Any
+) -> bool:
+    """Run and record one real-model check (answers.md D1f).
+
+    G1 first; if it is not conclusive, G2 as well. The check passes if one goal has ≥ 5
+    symptomatic runs and ≥ 4 of them are attributed correctly; it is inconclusive if no
+    goal reaches 5 symptomatic runs.
     """
-    correct = symptomatic = 0
-    ids: list[str] = []
-    for seed in range(1, MODEL_MAX_SEEDS + 1):
-        task = f"t{(seed - 1) % 5 + 1:02d}"
-        r = lab.run(config, task, attack, model, seed, **kw)
-        v = lab.trace(r)
-        if v is None:
-            continue
-        symptomatic += 1
-        ids.append(r.run_id)
-        correct += judge(r, v)
-        if symptomatic == MODEL_NEEDED:
-            break
-    return correct, symptomatic, ids, symptomatic < MODEL_NEEDED
+    samples = [sample_goal(lab, config, "G1", judge, **kw)]
+    if not samples[0].conclusive:
+        samples.append(sample_goal(lab, config, "G2", judge, **kw))
+    passing = [g for g in samples if g.conclusive and g.correct >= 4]
+    chosen = passing[0] if passing else next((g for g in samples if g.conclusive), samples[-1])
+    notes = "; ".join(
+        f"{g.goal}: {g.symptomatic}/{g.tried} symptomatic, {g.correct} correct" for g in samples
+    )
+    notes += f"; decided by {chosen.goal}" if chosen.conclusive else "; no goal reached 5"
+    return record(
+        check,
+        chosen.correct,
+        chosen.symptomatic,
+        4,
+        notes,
+        chosen.ids,
+        inconclusive=not any(g.conclusive for g in samples),
+    )

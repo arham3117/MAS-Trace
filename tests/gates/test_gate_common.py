@@ -57,7 +57,7 @@ def test_gc4_no_false_alarms(lab: Lab, config: str) -> None:
 
 @pytest.mark.model
 def test_gc4_no_false_alarms_dev_open(lab: Lab) -> None:
-    runs = [lab.run("s1_chain", t, None, "dev_open", s) for t, s in SCRIPTED_RUNS]
+    runs = [lab.run("s1_chain", t, None, "dev_open", s) for t, s in SCRIPTED_RUNS]  # 5 clean runs
     ok = sum(not lab.alerts(r) and not lab.verdicts(r) for r in runs)
     notes = "; ".join(
         f"{r.run_id}: {[a.detector for a in lab.alerts(r)]}" for r in runs if lab.alerts(r)

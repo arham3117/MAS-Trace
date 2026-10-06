@@ -58,12 +58,10 @@ def test_g1_3_fanout_scripted(lab: Lab) -> None:
 @pytest.mark.model
 @pytest.mark.slow
 def test_g1_1_chain_dev_open(lab: Lab) -> None:
-    ok, n, ids, inconclusive = model_check(lab, "s1_chain", "g1s0", chain_ok)
-    assert record("G1-1[dev_open]", ok, n, 4, f"{n} symptomatic of ≤15 seeds", ids, inconclusive)
+    assert model_check(lab, "G1-1[dev_open]", "s1_chain", chain_ok)
 
 
 @pytest.mark.model
 @pytest.mark.slow
 def test_g1_2_fanin_dev_open(lab: Lab) -> None:
-    ok, n, ids, inconclusive = model_check(lab, "s1_fanin", "g1s0", fanin_ok)
-    assert record("G1-2[dev_open]", ok, n, 4, f"{n} symptomatic of ≤15 seeds", ids, inconclusive)
+    assert model_check(lab, "G1-2[dev_open]", "s1_fanin", fanin_ok)

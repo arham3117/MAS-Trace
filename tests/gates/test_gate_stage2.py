@@ -88,5 +88,4 @@ def test_g2_3_culprit_after_back_and_forth(lab: Lab) -> None:
 @pytest.mark.model
 @pytest.mark.slow
 def test_g2_3_dev_open(lab: Lab) -> None:
-    ok, n, ids, inconclusive = model_check(lab, "s2_two_way_chain", "g1s0", two_way_ok)
-    assert record("G2-3[dev_open]", ok, n, 4, f"{n} symptomatic of ≤15 seeds", ids, inconclusive)
+    assert model_check(lab, "G2-3[dev_open]", "s2_two_way_chain", two_way_ok)

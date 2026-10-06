@@ -9,6 +9,7 @@ import sys
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 from mastrace.core.logging import code_version
 from mastrace.settings import REPO_ROOT
@@ -48,11 +49,51 @@ def run_gate(stage: int, include_model: bool = True, extra: list[str] | None = N
     return GateOutcome(stage, overall_of(results, proc.returncode), report, proc.returncode)
 
 
-def read_results(path: Path = CURRENT) -> list[dict[str, object]]:
-    """Check results written by the gate suites."""
+def _lines(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+
+
+def read_results(path: Path = CURRENT) -> list[dict[str, object]]:
+    """Check results written by the gate suites."""
+    return [r for r in _lines(path) if "check" in r]
+
+
+def read_propagation(path: Path = CURRENT) -> list[dict[str, Any]]:
+    """Per-run propagation lines written by the real-model checks (answers.md D1d)."""
+    return [r for r in _lines(path) if r.get("type") == "propagation"]
+
+
+HOPS = ("A", "B", "C", "D", "E", "final_output", "outbox")
+
+
+def propagation_table(rows: list[dict[str, Any]]) -> list[str]:
+    """Markdown 'Propagation by hop': share of attack runs with attacker content per hop,
+    as anchor% / overlap%."""
+    if not rows:
+        return []
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for r in rows:
+        groups.setdefault((str(r["config"]), str(r["goal"])), []).append(r)
+    out = [
+        "",
+        "## Propagation by hop",
+        "",
+        "Share of attack runs where attacker content reached each hop "
+        "(anchor % / 5-gram overlap %).",
+        "",
+        "| Config | Goal | Runs | " + " | ".join(HOPS) + " |",
+        "|---|---|---|" + "---|" * len(HOPS),
+    ]
+    for (config, goal), rs in sorted(groups.items()):
+        cells = []
+        for hop in HOPS:
+            a = sum(bool(r["hops"][hop]["anchor"]) for r in rs) / len(rs)
+            o = sum(bool(r["hops"][hop]["overlap"]) for r in rs) / len(rs)
+            cells.append(f"{a:.0%} / {o:.0%}")
+        out.append(f"| {config} | {goal} | {len(rs)} | " + " | ".join(cells) + " |")
+    return out
 
 
 def overall_of(results: list[dict[str, object]], pytest_exit: int) -> str:

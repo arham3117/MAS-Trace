@@ -52,5 +52,4 @@ def test_g3_2_picks_causal_path(lab: Lab) -> None:
 @pytest.mark.model
 @pytest.mark.slow
 def test_g3_2_dev_open(lab: Lab) -> None:
-    ok, n, ids, inconclusive = model_check(lab, "s3_mixed_two_paths", "g1s0", causal_ok)
-    assert record("G3-2[dev_open]", ok, n, 4, f"{n} symptomatic of ≤15 seeds", ids, inconclusive)
+    assert model_check(lab, "G3-2[dev_open]", "s3_mixed_two_paths", causal_ok)
